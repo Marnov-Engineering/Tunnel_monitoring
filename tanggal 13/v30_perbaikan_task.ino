@@ -22,6 +22,7 @@
 #include <ArduinoHttpClient.h>
 #include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
+#include "esp_system.h"
 #include <PID_v1.h>
 
 #include "FS.h"
@@ -31,6 +32,8 @@
 #define VERSION 1
 SemaphoreHandle_t  sdCardMutex;
 bool bPertamaKirim = 1;
+int counterParsing = 0;
+bool PrepareSelesai = 0;
 
 Preferences preferences;
 
@@ -64,6 +67,20 @@ PID PIDFan4(&InputFan4, &OutputFan4, &SetpointFan4, kpFan4, kiFan4, kdFan4, DIRE
 
 ESP32Time rtc;
 unsigned long timeUpdate;
+
+//json
+DynamicJsonDocument doc(16384); // pakai heap biar aman
+JsonArray rows = doc.createNestedArray("rows");
+String scriptURL = "https://script.google.com/macros/s/AKfycbzZfP1UmszC5JceiMZjyEcWA2HOOhwMyJ5zUW2M5ZCVNFsUoFRmiEsRJcfJZtyDJ8LBxw/exec";
+bool PengirimanPart = 0;
+double arrayJson[40][12];
+String arraywaktu[12];
+
+#define ROWS 40
+#define COL_SIZE 256
+
+uint8_t buffer[ROWS][COL_SIZE];   // buffer matrix
+size_t bytesPerRow[ROWS];         // menyimpan ukuran valid tiap baris buffer
 
 // const char* ssid = "Marnov";
 // const char* password = "jujurdanamanah";
@@ -655,11 +672,12 @@ void vSetupWifi(){
 
   Serial.printf("MAC address: %s\n", WiFi.macAddress().c_str());
   Serial.println(WiFi.softAPIP());
+
   unsigned long epochTime = getCurrentTime();
   rtc.setTime(epochTime);
   Serial.print("epochTime : ");
   Serial.println(epochTime);
-  client.setInsecure();
+  client.setInsecure(); //*
 
   //   WiFi.begin("Marnov", "jujurdanamanah");
   // Serial.print("Connecting to WiFi ..");
@@ -927,277 +945,6 @@ void printAllMACs() {
 }
 
 
-void parseSerialData(String input) {
-  Serial.print("input>> ");
-  Serial.println(input);
-
-  // int index = 0;
-  // int start = 0;
-  // for (int i = 0; i < input.length(); i++) {
-  //   if (input.charAt(i) == ',') {
-  //     data[index++] = input.substring(start, i);
-  //     start = i + 1;
-  //   }
-  // }
-  // data[index] = input.substring(start); // elemen terakhir
-
-  int index = 0;
-  int start = 0;
-
-  for (int i = 0; i < input.length(); i++) {
-    if (input.charAt(i) == ',') {
-      if (index < MAX_DATA) {
-        data[index++] = input.substring(start, i);
-      } else {
-        Serial.println("⚠️ Jumlah elemen melebihi kapasitas data[]!");
-        break;
-      }
-      start = i + 1;
-    }
-  }
-
-  // elemen terakhir
-  if (index < MAX_DATA) {
-    data[index] = input.substring(start);
-  }
-
-  // Tampilkan hasil parsing
-  for (int i = 0; i <= index; i++) {
-    Serial.print("data["); Serial.print(i); Serial.print("] = ");
-    Serial.println(data[i]);
-  }
-
-  
-
-  // SuhuDS1 = (CalM_DinD1*data[27].toFloat())+CalB_DinD1;
-  // SuhuDS2 = (CalM_DinD2*data[38].toFloat())+CalB_DinD2;
-  // SuhuDS3 = (CalM_DinD3*data[44].toFloat())+CalB_DinD3;
-
-
-  readkec1[indexMA] = safeValue(data[1]).toFloat();
-  readkec2[indexMA] = safeValue(data[4]).toFloat();
-  readkec3[indexMA] = safeValue(data[7]).toFloat();
-  readkec4[indexMA] = safeValue(data[10]).toFloat();
-  readkec5[indexMA] = safeValue(data[13]).toFloat();
-  readkec6[indexMA] = safeValue(data[16]).toFloat();
-  readkec7[indexMA] = safeValue(data[19]).toFloat();
-  readUkec1[indexMA] = safeValue(data[23]).toFloat();
-  readUkec2[indexMA] = safeValue(data[27]).toFloat();
-
-  indexMA = (indexMA + 1) % WINDOW_SIZE;
-  if (countMA < WINDOW_SIZE) countMA++;
-  //////////////////////////////////////// Kec 1
-  Totalkec1 = 0;
-  for (int i = 0; i < countMA; i++) {
-    Totalkec1 += readkec1[i];
-  }
-  Averagekec1 = Totalkec1 / countMA;
-
-  //////////////////////////////////////// Kec 2
-  Totalkec2 = 0;
-  for (int i = 0; i < countMA; i++) {
-    Totalkec2 += readkec2[i];
-  }
-  Averagekec2 = Totalkec2 / countMA;
-
-  //////////////////////////////////////// Kec 3
-  Totalkec3 = 0;
-  for (int i = 0; i < countMA; i++) {
-    Totalkec3 += readkec3[i];
-  }
-  Averagekec3 = Totalkec3 / countMA;
-
-  //////////////////////////////////////// Kec 4
-  Totalkec4 = 0;
-  for (int i = 0; i < countMA; i++) {
-    Totalkec4 += readkec4[i];
-  }
-  Averagekec4 = Totalkec4 / countMA;
-
-  //////////////////////////////////////// Kec 5
-  Totalkec5 = 0;
-  for (int i = 0; i < countMA; i++) {
-    Totalkec5 += readkec5[i];
-  }
-  Averagekec5 = Totalkec5 / countMA;
-
-  //////////////////////////////////////// Kec 6
-  Totalkec6 = 0;
-  for (int i = 0; i < countMA; i++) {
-    Totalkec6 += readkec6[i];
-  }
-  Averagekec6 = Totalkec6 / countMA;
-
-  //////////////////////////////////////// Kec 7
-  Totalkec7 = 0;
-  for (int i = 0; i < countMA; i++) {
-    Totalkec7 += readkec7[i];
-  }
-  Averagekec7 = Totalkec7 / countMA;
-
-  //////////////////////////////////////// UKec 1
-  TotalUkec1 = 0;
-  for (int i = 0; i < countMA; i++) {
-    TotalUkec1 += readUkec1[i];
-  }
-  AverageUkec1 = TotalUkec1 / countMA;
-
-  //////////////////////////////////////// UKec 2
-  TotalUkec2 = 0;
-  for (int i = 0; i < countMA; i++) {
-    TotalUkec2 += readUkec2[i];
-  }
-  AverageUkec2 = TotalUkec2 / countMA;
-
-
-  // suhu1 = data[0];
-  // kec1 = data[1];
-  // Humid1 = data[2];
-
-  // suhu2 = data[3];
-  // kec2 = data[4];
-  // Humid2 = data[5];
-
-  // suhu3 = data[6];
-  // kec3 = data[7];
-  // Humid3 = data[8];
-
-  // suhu4 = data[9];
-  // kec4 =  data[10];
-  // Humid4 = data[11];
-
-  // suhu5 = data[12];
-  // kec5 = data[13];
-  // Humid5 = data[14];
-
-  // suhu6 = data[15];
-  // kec6 = data[16];
-  // Humid6 = data[17];
-
-  // suhu7 = data[18];
-  // kec7 = data[19];
-  // Humid7 = data[20];
-
-  // Usuhu1 = data[21];
-  // UHumid1 = data[22]; 
-  // Ukec1 = data[23];
-  // USDP1 = data[24];
-
-  // Usuhu2 = data[25];
-  // UHumid2 = data[26]; 
-  // Ukec2 = data[27];
-  // USDP2 = data[28];
-
-  suhu1 = data[0];
-  kec1 = String(Averagekec1);
-  Humid1 = data[2];
-
-  suhu2 = data[3];
-  kec2 = String(Averagekec2);
-  Humid2 = data[5];
-
-  suhu3 = data[6];
-  kec3 = String(Averagekec3);
-  Humid3 = data[8];
-
-  suhu4 = data[9];
-  kec4 = String(Averagekec4);
-  Humid4 = data[11];
-
-  suhu5 = data[12];
-  kec5 = String(Averagekec5);
-  Humid5 = data[14];
-
-  suhu6 = data[15];
-  kec6 = String(Averagekec6);
-  Humid6 = data[17];
-
-  suhu7 = data[18];
-  kec7 = String(Averagekec7);
-  Humid7 = data[20];
-
-  Usuhu1 = data[21];
-  UHumid1 = data[22]; 
-  Ukec1 = String(AverageUkec1);
-  USDP1 = data[24];
-
-  Usuhu2 = data[25];
-  UHumid2 = data[26]; 
-  Ukec2 = String(AverageUkec2);
-  USDP2 = data[28];
-  // 29 tidak dipakai
-  // 30 tidak dipakai
-  // 31 tidak dipakai
-
-  // ================= HEATER 1 =================
-
-  Heater_st_1     = data[32].toInt();
-  Fan_Power_1     = data[33].toInt();
-  Power_Tunnel_1  = data[34].toInt();
-  WCSstate1       = !data[35].toInt();
-  SuhuDS1         = safeValue(data[36]).toFloat();
-  BME1            = safeValue(data[37]).toFloat();
-  setpoint1       = data[38].toFloat();
-  kp1             = data[39].toFloat();
-  ki1             = data[40].toFloat();
-  kd1             = data[41].toFloat();
-  out_pid1        = data[42].toFloat();
-  CalM_DinD1      = data[43].toFloat();
-  CalB_DinD1      = data[44].toFloat();
-  Max_PID_Tunnel_1 = data[45].toInt();
-
-  // ================= HEATER 2 =================
-  Heater_st_2     = data[46].toInt();
-  Fan_Power_2     = data[47].toInt();
-  Power_Tunnel_2  = data[48].toInt();
-  WCSstate2       = !data[49].toInt();
-  SuhuDS2         = safeValue(data[50]).toFloat();
-  BME2            = safeValue(data[51]).toFloat();
-  setpoint2       = data[52].toFloat();
-  kp2             = data[53].toFloat();
-  ki2             = data[54].toFloat();
-  kd2             = data[55].toFloat();
-  out_pid2        = data[56].toFloat();
-  CalM_DinD2      = data[57].toFloat();
-  CalB_DinD2      = data[58].toFloat();
-  Max_PID_Tunnel_2 = data[59].toInt();
-
-  // ================= HEATER 3 =================
-  Heater_st_3     = data[60].toInt();
-  Fan_Power_3     = data[61].toInt();
-  Power_Tunnel_3  = data[62].toInt();
-  WCSstate3       = !data[63].toInt();
-  SuhuDS3         = safeValue(data[64]).toFloat();
-  BME3            = safeValue(data[65]).toFloat();
-  setpoint3       = data[66].toFloat();
-  kp3             = data[67].toFloat();
-  ki3             = data[68].toFloat();
-  kd3             = data[69].toFloat();
-  out_pid3        = data[70].toFloat();
-  CalM_DinD3      = data[71].toFloat();
-  CalB_DinD3      = data[72].toFloat();
-  Max_PID_Tunnel_3 = data[73].toInt();
-
-
-  if (SuhuDS1 < 0) SuhuDS1 = 0;
-  if (SuhuDS2 < 0) SuhuDS2 = 0;
-  if (SuhuDS3 < 0) SuhuDS3 = 0;
-
-  // // Cetak semua nilai yang diterima
-  // for (int i = 0; i <= index; i++) {
-  //   Serial.printf("data[%d] = %s\n", i, data[i].c_str());
-
-  // }
-  isSdCardLogging = true;
-  vTulisKeSDcard();
-  // accessToGoogleSheets();
-  Serial.println("selesai mendapatkan data");
-  printAllMACs();
-  Serial.println("selesai Mengirim data");
-  // reset_arr bisa diatur di sini juga kalau diperlukan
-  // reset_arr = 0;
-}
-
 void vPemindahanData(){
   readkec1[indexMA] = safeValue(data[1]).toFloat();
   readkec2[indexMA] = safeValue(data[4]).toFloat();
@@ -1411,10 +1158,14 @@ void vPemindahanData(){
   // // Cetak semua nilai yang diterima
   // for (int i = 0; i <= index; i++) {
   //   Serial.printf("data[%d] = %s\n", i, data[i].c_str());
-
   // }
+
   isSdCardLogging = true;
-  vTulisKeSDcard();
+  if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
+    vTulisKeSDcard(); //edit ini
+    xSemaphoreGive(sdCardMutex);
+  }
+  
   // accessToGoogleSheets();
   Serial.println("selesai mendapatkan data");
   printAllMACs();
@@ -1479,50 +1230,6 @@ void accessToGoogleSheets() {
   }
 }
 
-void vPembacaanSerial(){
-  // static String serialBuffer = "";
-  static char serialBuff[1000];
-  static int indexChar = 0;
-
-  while (Serial2.available()) {
-    char c = Serial2.read();
-    Serial.print(c);
-
-    if (c == '<') {
-      indexChar = 0;
-      // serialBuffer = "";
-      // char serialBuff[1000];
-    } 
-
-    
-    else if (c == '>') {
-
-      Serial.print("indexChar> ");
-      Serial.println(indexChar);
-
-      // Data lengkap diterima
-
-      serialBuff[indexChar++] = '\0';
-
-
-      Serial.println(String(serialBuff));
-      parseSerialData(String(serialBuff));
-
-      isSdCardLogging = true;
-    }
-
-
-    else {
-        serialBuff[indexChar++] = c;
-    }
-  }
-
-
-
-}
-
-
-
 String ambilData(String data, char pemisah, int urutan) {
   stringData = 0;
   perBagianData = "";
@@ -1541,45 +1248,6 @@ String ambilData(String data, char pemisah, int urutan) {
   return perBagianData;
 }
 
-// void vCheckASCII(){
-//   int str_len = data1.length()+1;
-//   char databaru[str_len];
-//   Serial.print("str_len = ");
-//   Serial.println(CounterKoma);
-//   data1.toCharArray(databaru,str_len);
-//   char buffer[4*sizeof(databaru)]; //sized for the worst case scenario of each being in the hundreds plus a space between each and a null
-//   char* buffPtr = buffer;
-//   int Pointer = 0;
-//   int ASCIICode = 0;
-//   DataNotValid = 0;
-//   Serial.print("sizeof(databaru)");
-//   Serial.println(sizeof(databaru));
-//   for(byte i = 0; i < str_len - 1; i++){
-//     itoa((int)databaru[i],buffPtr,10); //convert the next character to a string and store it in the buffer
-//     buffPtr += strlen(buffPtr); //move on to the position of the null character
-//     DataBuffer = String(buffer);
-//     DataASCII = DataBuffer.substring(Pointer,DataBuffer.length());
-//     ASCIICode = DataASCII.toInt();
-//     Serial.print("ASCIICode = ");
-//     Serial.println(ASCIICode);
-//     if (ASCIICode >=48 && ASCIICode <=57){
-
-//     } else if (ASCIICode == 46 || ASCIICode == 44 || ASCIICode == 45 || ASCIICode == 13){
-    
-//     } else {
-//       DataNotValid = 1;
-//       Serial.print("RUSAK ASCIICode = ");
-//       Serial.print(ASCIICode);
-//       Serial.println("  , DATA RUSAK");
-//     }
-//     *buffPtr = ' '; //replace with a space
-//     buffPtr++; //move on ready for next
-//     Pointer += 3;
-//   }
-//   buffPtr--; //move back a character to where the final space (' ') is
-//   *buffPtr = '\0'; //replace it with a null to terminate the string
-//   Serial.println(buffer);
-// }
 void vCheckASCII() {
   int str_len = data1.length() + 1;
   char databaru[str_len];
@@ -1607,10 +1275,6 @@ void vCheckASCII() {
 
   if (!DataNotValid) Serial.println("Semua karakter valid");
 }
-
-
-
-
 
 void vAmbilDataDariSerial2(){
   if (Serial2.available()>0) {
@@ -1668,7 +1332,303 @@ void vAmbilDataDariSerial2(){
       }
     }
     vPemindahanData();
+    vPengambilanDataSpreadSheet();
+    // vPrepareSpreadsheet();
+    counterParsing++;
+    Serial.print("counterParsing = ");
+    Serial.println(counterParsing);
   }
+}
+
+void vPrepareSpreadsheet(){
+  JsonArray rows = doc["rows"].as<JsonArray>();
+  if (rows.isNull()) {
+    rows = doc.createNestedArray("rows");
+  }
+  for (int i = 0; i < counterParsing; i++) {
+    JsonObject row = rows.createNestedObject();
+    String waktums = arraywaktu[i];
+    
+    row["Time"] = arraywaktu[i];
+    row["S1"] = arrayJson[ 1][i];
+    row["S2"] = arrayJson[ 2][i];
+    row["S3"] = arrayJson[ 3][i];
+    row["S4"] = arrayJson[ 4][i];
+    row["S5"] = arrayJson[ 5][i];
+    row["S6"] = arrayJson[ 6][i];
+    row["S7"] = arrayJson[ 7][i];
+    row["SU1"] = arrayJson[ 8][i];
+    row["SU2"] = arrayJson[ 9][i];
+    row["SD1"] = arrayJson[10][i];
+    row["SD2"] = arrayJson[11][i];
+    row["SD3"] = arrayJson[12][i];
+    row["SP1"] = arrayJson[13][i];
+    row["SP2"] = arrayJson[14][i];
+    row["SP3"] = arrayJson[15][i];
+    row["H1"] = arrayJson[16][i];
+    row["H2"] = arrayJson[17][i];
+    row["H3"] = arrayJson[18][i];
+    row["H4"] = arrayJson[19][i];
+    row["H5"] = arrayJson[20][i];
+    row["H6"] = arrayJson[21][i];
+    row["H7"] = arrayJson[22][i];
+    row["HU1"] = arrayJson[23][i];
+    row["HU2"] = arrayJson[24][i];
+    row["K1"] = arrayJson[25][i];
+    row["K2"] = arrayJson[26][i];
+    row["K3"] = arrayJson[27][i];
+    row["K4"] = arrayJson[28][i];
+    row["K5"] = arrayJson[29][i];
+    row["K6"] = arrayJson[30][i];
+    row["K7"] = arrayJson[31][i];
+    row["KU1"] = arrayJson[32][i];
+    row["KU2"] = arrayJson[33][i];
+    row["PU1"] = arrayJson[34][i];
+    row["PU2"] = arrayJson[35][i];
+    row["PID1"] = arrayJson[36][i];
+    row["PID2"] = arrayJson[37][i];
+    row["PID3"] = arrayJson[38][i];
+    row["Error"] = arrayJson[39][i];
+    delay(1); // supaya tidak WDT reset
+  }
+  counterParsing = 0;
+}
+
+void vPengambilanDataSpreadSheet(){
+  Serial.println("Pengambilan data untuk spreadsheet");
+  Serial.print("untuk data ke ");
+  Serial.println(counterParsing);
+  unsigned long baseEpoch = getCurrentTime();
+  char epochMs[20];
+    sprintf(epochMs, "%lu000", baseEpoch);
+    Serial.print("epochMs :");
+    Serial.println(epochMs);
+    arraywaktu[counterParsing] = String(epochMs);
+    arrayJson[ 1][counterParsing] = suhu1.toFloat();
+    arrayJson[ 2][counterParsing] = suhu2.toFloat();
+    arrayJson[ 3][counterParsing] = suhu3.toFloat();
+    arrayJson[ 4][counterParsing] = suhu4.toFloat();
+    arrayJson[ 5][counterParsing] = suhu5.toFloat();
+    arrayJson[ 6][counterParsing] = suhu6.toFloat();
+    arrayJson[ 7][counterParsing] = suhu7.toFloat();
+    arrayJson[ 8][counterParsing] = Usuhu1.toFloat();
+    arrayJson[ 9][counterParsing] = Usuhu2.toFloat();
+    arrayJson[10][counterParsing] = SuhuDS1;
+    arrayJson[11][counterParsing] = SuhuDS2;
+    arrayJson[12][counterParsing] = SuhuDS3;
+    arrayJson[13][counterParsing] = BME1;
+    arrayJson[14][counterParsing] = BME2;
+    arrayJson[15][counterParsing] = BME3;
+    arrayJson[16][counterParsing] = Humid1.toFloat();
+    arrayJson[17][counterParsing] = Humid2.toFloat();
+    arrayJson[18][counterParsing] = Humid3.toFloat();
+    arrayJson[19][counterParsing] = Humid4.toFloat();
+    arrayJson[20][counterParsing] = Humid5.toFloat();
+    arrayJson[21][counterParsing] = Humid6.toFloat();
+    arrayJson[22][counterParsing] = Humid7.toFloat();
+    arrayJson[23][counterParsing] = UHumid1.toFloat();
+    arrayJson[24][counterParsing] = UHumid2.toFloat();
+    arrayJson[25][counterParsing] = kec1.toFloat();
+    arrayJson[26][counterParsing] = kec2.toFloat();
+    arrayJson[27][counterParsing] = kec3.toFloat();
+    arrayJson[28][counterParsing] = kec4.toFloat();
+    arrayJson[29][counterParsing] = kec5.toFloat();
+    arrayJson[30][counterParsing] = kec6.toFloat();
+    arrayJson[31][counterParsing] = kec7.toFloat();
+    arrayJson[32][counterParsing] = Ukec1.toFloat();
+    arrayJson[33][counterParsing] = Ukec2.toFloat();
+    arrayJson[34][counterParsing] = USDP1.toFloat();
+    arrayJson[35][counterParsing] = USDP2.toFloat();
+    arrayJson[36][counterParsing] = out_pid1;
+    arrayJson[37][counterParsing] = out_pid2;
+    arrayJson[38][counterParsing] = out_pid3;
+    arrayJson[39][counterParsing] = CounterDataError;
+
+    for (int j = 0; j < counterParsing +1; j++) {
+    Serial.printf("Data ke-%d: ", j);
+    Serial.printf("Epoch-> %s: ", arraywaktu[j]);
+    for (int i = 0; i < 40; i++) {
+      Serial.print(arrayJson[i][j], 2);
+      if (i < 39) Serial.print(", ");
+    }
+    Serial.println();
+  }
+}
+
+float randFloat(float minv, float maxv, int decimals=2){
+  long mini = (long)(minv * pow(10, decimals));
+  long maxi = (long)(maxv * pow(10, decimals));
+  long r = random(mini, maxi + 1);
+  return ((float)r) / pow(10, decimals);
+}
+
+void vPengirimanSpreadsheet(){
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi not connected!");
+    return;
+  }
+  Serial.print("Waktu awal spreadsheet :");
+  Serial.println(millis());
+
+  
+  // JsonArray rows = doc.createNestedArray("rows");
+
+  unsigned long baseEpoch = getCurrentTime();
+
+  Serial.print("baseEpoch :");
+  Serial.println(baseEpoch);
+
+  String payload;
+  serializeJson(doc, payload);
+  HTTPClient http;
+  
+  http.begin(scriptURL);
+  http.addHeader("Content-Type", "application/json");
+
+  Serial.println("Posting 12 rows...");
+  Serial.println("payload");
+  Serial.println(payload);
+
+  // client.setInsecure();  
+
+  // if (http.begin(client, scriptURL)) {
+  //   http.addHeader("Content-Type", "application/json");
+
+  //   // Serial.println("Posting 12 rows...");
+  //   http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
+  //   int httpCode = http.POST(payload);
+
+  //   if (httpCode > 0) {
+  //     String response = http.getString();
+  //     Serial.printf("HTTP %d → %s\n", httpCode, response.c_str());
+  //   } else {
+  //     Serial.printf("POST failed: %s\n", http.errorToString(httpCode).c_str());
+  //   }
+  //   Serial.print("httpCode :");
+  //   Serial.println(httpCode);
+
+  //   http.end();
+  // } else {
+  //   Serial.println("Unable to connect to server!");
+  // }
+
+  // http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
+  int httpCode = http.POST(payload);
+
+  if (httpCode > 0) {
+    String response = http.getString();
+    Serial.printf("HTTP %d → %s\n", httpCode, response.c_str());
+  } else {
+    
+    Serial.printf("POST failed: %s\n", http.errorToString(httpCode).c_str());
+  }
+  Serial.print("httpCode :");
+  Serial.print(httpCode);
+
+  http.end();
+  Serial.print("Waktu akhir spreadsheet :");
+  Serial.println(millis());
+  delay(10);
+}
+
+void vPengirimanSpreadsheet2() {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi not connected!");
+    return;
+  }
+  Serial.print("Waktu awal :");
+  Serial.println(millis());
+
+  // DynamicJsonDocument doc(16384); // pakai heap biar aman
+  // JsonArray rows = doc.createNestedArray("rows");
+
+  // unsigned long baseEpoch = getCurrentTime();
+
+  // Serial.print("baseEpoch :");
+  // Serial.println(baseEpoch);
+  
+  for (int i = 0; i < 12; i++) {
+
+    JsonObject row = rows.createNestedObject();
+    // row["Time"] = arrayJson[ 0][i];
+    row["Time"] = arraywaktu[i];
+    row["S1"] = arrayJson[ 1][i];
+    row["S2"] = arrayJson[ 2][i];
+    row["S3"] = arrayJson[ 3][i];
+    row["S4"] = arrayJson[ 4][i];
+    row["S5"] = arrayJson[ 5][i];
+    row["S6"] = arrayJson[ 6][i];
+    row["S7"] = arrayJson[ 7][i];
+    row["SU1"] = arrayJson[ 8][i];
+    row["SU2"] = arrayJson[ 9][i];
+    row["SD1"] = arrayJson[10][i];
+    row["SD2"] = arrayJson[11][i];
+    row["SD3"] = arrayJson[12][i];
+    row["SP1"] = arrayJson[13][i];
+    row["SP2"] = arrayJson[14][i];
+    row["SP3"] = arrayJson[15][i];
+    row["H1"] = arrayJson[16][i];
+    row["H2"] = arrayJson[17][i];
+    row["H3"] = arrayJson[18][i];
+    row["H4"] = arrayJson[19][i];
+    row["H5"] = arrayJson[20][i];
+    row["H6"] = arrayJson[21][i];
+    row["H7"] = arrayJson[22][i];
+    row["HU1"] = arrayJson[23][i];
+    row["HU2"] = arrayJson[24][i];
+    row["K1"] = arrayJson[25][i];
+    row["K2"] = arrayJson[26][i];
+    row["K3"] = arrayJson[27][i];
+    row["K4"] = arrayJson[28][i];
+    row["K5"] = arrayJson[29][i];
+    row["K6"] = arrayJson[30][i];
+    row["K7"] = arrayJson[31][i];
+    row["KU1"] = arrayJson[32][i];
+    row["KU2"] = arrayJson[33][i];
+    row["PU1"] = arrayJson[34][i];
+    row["PU2"] = arrayJson[35][i];
+    row["PID1"] = arrayJson[36][i];
+    row["PID2"] = arrayJson[37][i];
+    row["PID3"] = arrayJson[38][i];
+    row["Error"] = arrayJson[39][i];
+    delay(1); // supaya tidak WDT reset
+  }
+
+  String payload;
+  serializeJson(doc, payload);
+
+  HTTPClient http;
+  http.begin(scriptURL);
+  http.addHeader("Content-Type", "application/json");
+
+  Serial.println("Posting 12 rows...");
+  Serial.println("payload");
+  Serial.println(payload);
+  int httpCode = http.POST(payload);
+
+  if (httpCode > 0) {
+    String response = http.getString();
+    Serial.printf("HTTP %d → %s\n", httpCode, response.c_str());
+  } else {
+    
+    Serial.printf("POST failed: %s\n", http.errorToString(httpCode).c_str());
+  }
+  Serial.print("httpCode :");
+  Serial.print(httpCode);
+  http.end();
+  Serial.print("Waktu akhir :");
+  Serial.println(millis());
+  delay(10);
+}
+
+void connectWiFi() {
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.printf("\nWiFi connected: %s\n", WiFi.localIP().toString().c_str());
 }
 
 void vAwalSdCard(){
@@ -1782,6 +1742,54 @@ void vKirimFirebase(){
     renameDataFirebase(SD, "/TunnelData.csv");
     vTulisDataAwalTunnel();
 
+    xSemaphoreGive(sdCardMutex);
+  }
+
+  // verifyCopyCRC(SD, "/TunnelData.csv");
+
+  
+}
+
+void vRenameDataCSV(){
+
+  // unsigned long epochTime = getCurrentTime();
+  unsigned long epochTime = rtc.getEpoch();
+
+  Serial.print("epochTime = ");
+  Serial.println(epochTime);
+
+  struct tm timeinfo;
+  gmtime_r((time_t*)&epochTime, &timeinfo);  // pecah epoch ke tm
+
+  currentYear  = timeinfo.tm_year + 1900;
+  currentMonth = timeinfo.tm_mon + 1;
+  currentDay   = timeinfo.tm_mday;
+
+  Serial.printf("Tanggal: %04d-%02d-%02d\n", currentYear, currentMonth, currentDay);
+
+
+  char fileName[80] = "";
+  char fileLoc[80] = "";
+  snprintf(fileName, sizeof(fileName), "Tunnel_%04d-%02d-%02d.csv", currentYear,currentMonth,currentDay);
+  snprintf(fileLoc, sizeof(fileLoc), "/Tunnel_%04d-%02d-%02d.csv", currentYear,currentMonth,currentDay);
+  char fileNameUpload[80] = "";
+  char fileLocUpload[80] = "";
+  snprintf(fileNameUpload, sizeof(fileNameUpload), "Up_Tunnel_%04d-%02d-%02d.csv", currentYear,currentMonth,currentDay);
+  snprintf(fileLocUpload, sizeof(fileLocUpload), "/Up_Tunnel_%04d-%02d-%02d.csv", currentYear,currentMonth,currentDay);
+
+  Serial.println("performPost");
+  Serial.print("fileName=");
+  Serial.println(fileName);
+  Serial.print("fileLoc=");
+  Serial.println(fileLoc);
+  Serial.print("fileNameUpload=");
+  Serial.println(fileNameUpload);
+  Serial.print("fileLocUpload=");
+  Serial.println(fileLocUpload);
+  
+  if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
+    renameDataFirebase(SD, "/TunnelData.csv");
+    vTulisDataAwalTunnel();
     xSemaphoreGive(sdCardMutex);
   }
 
@@ -2039,39 +2047,33 @@ void refreshWiFi() {
   }
 }
 
-void VsetupPID(){
-  PIDFan1.SetOutputLimits(0, 180);
-  PIDFan1.SetSampleTime(10000);
-  PIDFan1.SetMode(AUTOMATIC);
-
-  PIDFan2.SetOutputLimits(0, 180);
-  PIDFan2.SetSampleTime(10000);
-  PIDFan2.SetMode(AUTOMATIC);
-}
-
 void setup() {
   // put your setup code here, to run once:
   pinMode(LED_INDX, OUTPUT);
   Serial.begin(115200);
   
   
-  vSetupLittlefs();
-  vSetupSDcard();
+  vSetupLittlefs(); //*
+  vSetupSDcard(); // *
   // vAwalSdCard();
-  vAwalSetupSdCard();
-  initData();
+  vAwalSetupSdCard(); //*
+  initData(); //*
   // for (int i = 0; i < WINDOW_SIZE; i++) {
   //   readings[i] = 0;
   // }
 
-  vSetupEEPROM();
+  vSetupEEPROM(); //*
   vSetupWifi();
+  // connectWiFi();
   timeClient.begin();
   timeClient.update();
+  getCurrentTime();
+  // vPengirimanSpreadsheet();
+  // postRandomBatch12();
 
-  vSetupServo();
-  VsetupPID();
-  vAsyncWebServer();
+  vSetupServo(); //*
+  // vAsyncWebServer(); //*
+  
   // vSetupEspNow();
   // ensureNvsReady();
   errorcount++;
@@ -2080,188 +2082,184 @@ void setup() {
   // nvs_flash_erase();
   // nvs_flash_init();
   // loadInfoUmum();
-  // vSetupADS();  //harus nyala
+  vSetupADS();  //harus nyala //*
+
   Serial2.begin(9600, SERIAL_8N1, RX_PIN, TX_PIN);
 
   sdCardMutex = xSemaphoreCreateMutex();
 
-  vKirimFirebase();
-  IntervalKirimServerMillis = 60000;
-  v_SendFile();
+  
+  
 
-  xTaskCreatePinnedToCore(
-    TaskSendData,   /* Task function. */
-    "TaskSendData",     /* name of task. */
-    20480,       /* Stack size of task */
-    NULL,        /* parameter of the task */
-    1,           /* priority of the task */
-    NULL,      /* Task handle to keep track of created task */
-    1);          /* pin task to core 0 */
+  // vKirimFirebase();
+
+  // vRenameDataCSV();
+  // IntervalKirimServerMillis = 60000;
+
+  //   unsigned long epochTime = getCurrentTime();
+  //   rtc.setTime(epochTime);PENGIRIMAN
+  //   Serial.println("Connection successful!");
+  //   // deleteFile(SD, "/TunnelData.csv");
+  //   // vTulisDataAwalTunnel();
+  //   char fileNameUpload[80] = "";
+  //   char fileLocUpload[80] = "";
+  //   snprintf(fileNameUpload, sizeof(fileNameUpload), "Up_Tunnel_%04d-%02d-%02d.csv",
+  //           currentYear, currentMonth, currentDay);
+  //   snprintf(fileLocUpload, sizeof(fileLocUpload), "/Up_Tunnel_%04d-%02d-%02d.csv",
+  //           currentYear, currentMonth, currentDay);
+
+  // unsigned long cTime = millis();
+  // if (vBacaFileDariSD(fileLocUpload)) {
+  //   v_SendFileTest();
+  // }
+  // Serial.print("millis taken for sending to fb>> ");
+  // Serial.println(millis() - cTime);
 
   // xTaskCreatePinnedToCore(
-  // ProssesPID,   /* Task function. */
-  // "ProssesPID",     /* name of task. */
-  // 20000,       /* Stack size of task */
-  // NULL,        /* parameter of the task */
-  // 3,           /* priority of the task */
-  // &Task5,      /* Task handle to keep track of created task */
-  // 0);                  
+  //   TaskPengirimanData,   /* Task function. */
+  //   "TaskPengirimanData",     /* name of task. */
+  //   20480,       /* Stack size of task */
+  //   NULL,        /* parameter of the task */
+  //   3,           /* priority of the task */
+  //   NULL,      /* Task handle to keep track of created task */
+  //   1);          /* pin task to core 0 */
+
+  xTaskCreatePinnedToCore(
+  TaskParsingSerial,   /* Task function. */
+  "TaskParsingSerial",     /* name of task. */
+  20000,       /* Stack size of task */
+  NULL,        /* parameter of the task */
+  1,           /* priority of the task */
+  NULL,      /* Task handle to keep track of created task */
+  0);
+
+  xTaskCreatePinnedToCore(
+  TaskPrepareDataAndSend,   /* Task function. */
+  "TaskPrepareDataAndSend",     /* name of task. */
+  20000,       /* Stack size of task */
+  NULL,        /* parameter of the task */
+  2,           /* priority of the task */
+  NULL,      /* Task handle to keep track of created task */
+  1);
+                    
 }
 
-void TaskSendData( void * pvParameters ){
+
+void TaskParsingSerial( void * pvParameters ){
   (void) pvParameters;
   TickType_t xLastWakeTime;
-  TickType_t xFrequency = IntervalKirimServerMillis/ portTICK_PERIOD_MS;
+  TickType_t xFrequency = 100/ portTICK_PERIOD_MS;
   xLastWakeTime = xTaskGetTickCount ();
   for(;;){
     if (!bOTAStart) {
-      if(bPertamaKirim){
-        bPertamaKirim = 0;
-        
-      }else{
-        digitalWrite(LED_INDX, HIGH);
-        vKirimFirebase();
-
-        if(part > 0){
-          Serial.println("Masuk part!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-          Serial.print("part = ");
-          Serial.println(part);
-          for(int i = 0; i < part; i++){
-            
-            v_SendFilePart(i);
-          }
-        }
-        Serial.println("Beres part#############################################################################");
-        v_SendFile();
-        
-        preferences.putInt("part", part);
-        Serial.printf("Stack free TaskSendData: %d\n", uxTaskGetStackHighWaterMark(NULL));
-        digitalWrite(LED_INDX, LOW);
-      }
+        vAmbilDataDariSerial2();
     }
-    xFrequency = IntervalKirimServerMillis/ portTICK_PERIOD_MS;
     vTaskDelayUntil( &xLastWakeTime, xFrequency );
   }
 }
 
-// void ProssesPID( void * pvParameters ) {
-//   (void) pvParameters;
-//   TickType_t xLastWakeTime;
-//   const TickType_t xFrequency = 10 / portTICK_PERIOD_MS;
-//   xLastWakeTime = xTaskGetTickCount ();
-//   PIDFan1.SetOutputLimits(0, 1000);          // Penting untuk jaga range
-//   PIDFan2.SetOutputLimits(0, 1000);          // Penting untuk jaga range
-//   PIDFan3.SetOutputLimits(0, 1000);          // Penting untuk jaga range
-//   PIDFan4.SetOutputLimits(0, 1000);          // Penting untuk jaga range
-//   for (;;) {
-//     // vUpdatePWMPID(); // harus nyala
-//     vTaskDelayUntil( &xLastWakeTime, xFrequency );
-//   }
-// }
+void TaskPrepareDataAndSend( void * pvParameters ){
+  (void) pvParameters;
+  TickType_t xLastWakeTime;
+  TickType_t xFrequency = 100/ portTICK_PERIOD_MS;
+  xLastWakeTime = xTaskGetTickCount ();
+  for(;;){
+    if (!bOTAStart) {
+      if(counterParsing == 12){ ///// harus 12
+        vRenameDataCSV();
+        char fileLocUpload[80] = "";
+        snprintf(fileLocUpload, sizeof(fileLocUpload), "/Up_Tunnel_%04d-%02d-%02d.csv",
+                currentYear, currentMonth, currentDay);
+        // if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
+        //     xSemaphoreGive(sdCardMutex);
+        //   }
+          vPrepareSpreadsheet();
+          vPengirimanSpreadsheet();
+          Serial.println("selesai pengiriman spreadsheet");
+          if (part > 0){
+            Serial.println("Masuk part!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            Serial.print("part = ");
+            Serial.println(part);
+            for(int i = 0; i < part; i++){
+              char fileLocUploadPart[80] = "";
+              snprintf(fileLocUploadPart, sizeof(fileLocUploadPart), "/Up_Tunnel_%04d-%02d-%02d-Part%d.csv",
+                      currentYear, currentMonth, currentDay, i+1);
+              Serial.println("fileLocUploadPart =");
+              Serial.println(fileLocUploadPart);
+              if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
+                bool Partready = vBacaFileDariSD(fileLocUploadPart);
+                xSemaphoreGive(sdCardMutex);
+                if(Partready){
+                  v_SendFilePart(i);
+                }
+              }
+            }
+          }
+          if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
+            bool FileReady = vBacaFileDariSD(fileLocUpload);
+            xSemaphoreGive(sdCardMutex);
+            Serial.println("Berhasil prepare sdcard");
+            if(FileReady){
+              v_SendFileTest();
+            }
+          }
 
-// void vUpdatePWMPID() {
-//   if (SetPointInput1 > 0 || SetPointInput2 > 0 || SetPointInput3 > 0 || SetPointInput4 > 0){
-//     vProcADS();
-//   }
 
-//   if(SetPointInput1 > 0) {
-//     // powerFanFeedback(); 
-//     InputFan1 = Watt1;
-//     SetpointFan1 = SetPointInput1;
-//     PIDFan1.SetMode(AUTOMATIC);
-//     PIDFan1.SetTunings(kpFan1, kiFan1, kdFan1);
-//     PIDFan1.Compute();
 
-//     OutputFan1 = OutputFan1 + 1000;
-//     servo1.write((int)OutputFan1);
-//   }
-//   else if (SetPointInput1 == 0) {
-//     // Jika tidak dalam mode arming, matikan PWM
-//     SetPointInput1 = 0;
-//     PIDFan1.SetMode(MANUAL);
-//     OutputFan1 = 0;
-//     // fanPower = 0;
-//     servo1.write(0);
-//     // ledcWrite(FanChannel, 0); // Set PWM output to 0
-//     // Serial.println("Fan is off");
-//   }
+          PrepareSelesai = 1; 
+         
+      }
+    }
+    vTaskDelayUntil( &xLastWakeTime, xFrequency );
+  }
+}
 
-//   if(SetPointInput2 > 0) {
-//     // powerFanFeedback(); 
-//     InputFan2 = Watt2;
-//     SetpointFan2 = SetPointInput2;
-//     PIDFan2.SetMode(AUTOMATIC);
-//     PIDFan2.SetTunings(kpFan2, kiFan2, kdFan2);
-//     PIDFan2.Compute();
+void TaskPengirimanData( void * pvParameters ){
+  (void) pvParameters;
+  TickType_t xLastWakeTime;
+  TickType_t xFrequency = 100/ portTICK_PERIOD_MS;
+  xLastWakeTime = xTaskGetTickCount ();
+  for(;;){
+    if (!bOTAStart) {
+      if (PrepareSelesai){
+        digitalWrite(LED_INDX, HIGH);
+        // if(part > 0){
+        //   Serial.println("Masuk part!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //   Serial.print("part = ");
+        //   Serial.println(part);
+        //   for(int i = 0; i < part; i++){
+        //     // prepare buffer
+        //     v_SendFilePart(i);
+        //   }
+        // }
+        
+        // Serial.println("Beres part#############################################################################");
+        // v_SendFileTest();
+        
+        // preferences.putInt("part", part);
+        // Serial.printf("Stack free TaskSendData: %d\n", uxTaskGetStackHighWaterMark(NULL));
+        // Serial.println("Kimim data !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        // vPengirimanSpreadsheet();
+        // Serial.println("selesai pengiriman spreadsheet");
+        PrepareSelesai = 0;
 
-//     OutputFan2 = OutputFan2 + 1000;
-//     servo2.write((int)OutputFan2);
-//   }
-//   else if (SetPointInput2 == 0) {
-//     // Jika tidak dalam mode arming, matikan PWM
-//     SetPointInput2 = 0;
-//     PIDFan2.SetMode(MANUAL);
-//     OutputFan2 = 0;
-//     // fanPower = 0;
-//     servo2.write(0);
-//     // ledcWrite(FanChannel, 0); // Set PWM output to 0
-//     // Serial.println("Fan is off");
-//   }
-
-//   if(SetPointInput3 > 0) {
-//     // powerFanFeedback(); 
-//     InputFan3 = Watt3;
-//     SetpointFan3 = SetPointInput3;
-//     PIDFan3.SetMode(AUTOMATIC);
-//     PIDFan3.SetTunings(kpFan3, kiFan3, kdFan3);
-//     PIDFan3.Compute();
-
-//     OutputFan3 = OutputFan3 + 1000;
-//     servo3.write((int)OutputFan3);
-//   }
-//   else if (SetPointInput3 == 0) {
-//     // Jika tidak dalam mode arming, matikan PWM
-//     SetPointInput3 = 0;
-//     PIDFan3.SetMode(MANUAL);
-//     OutputFan3 = 0;
-//     // fanPower = 0;
-//     servo3.write(0);
-//     // ledcWrite(FanChannel, 0); // Set PWM output to 0
-//     // Serial.println("Fan is off");
-//   }
-
-//   if(SetPointInput4 > 0) {
-//     // powerFanFeedback(); 
-//     InputFan4 = Watt4;
-//     SetpointFan4 = SetPointInput4;
-//     PIDFan4.SetMode(AUTOMATIC);
-//     PIDFan4.SetTunings(kpFan4, kiFan4, kdFan4);
-//     PIDFan4.Compute();
-//     OutputFan4 = OutputFan4 + 1000;
-//     servo4.writeMicroseconds((int)OutputFan4);
-//   }
-//   else if (SetPointInput4 == 0) {
-//     // Jika tidak dalam mode arming, matikan PWM
-//     SetPointInput4 = 0;
-//     PIDFan4.SetMode(MANUAL);
-//     OutputFan4 = 0;
-//     // fanPower = 0;
-//     servo4.write(0);
-//     // ledcWrite(FanChannel, 0); // Set PWM output to 0
-//     // Serial.println("Fan is off");
-//   }
-
-// }
+        digitalWrite(LED_INDX, LOW);
+      }
+    }
+    vTaskDelayUntil( &xLastWakeTime, xFrequency );
+  }
+  
+}
 
 void loop() {
   // put your main code here, to run repeatedly:
     if(millis() - ADSMillis >= IntervalADSMillis){
-      // vPembacaanADS();  //harus nyala
-      timeToReport = getCurrentTime();
+      vPembacaanADS();  //harus nyala
+      // timeToReport = getCurrentTime();
       if (timeToReport < 1759733365){
         errortimeToReport++;
       }
-      vReconnectWifi();
+      // vReconnectWifi();
 
       // Serial.println(waktuUpdate);
 
@@ -2277,28 +2275,39 @@ void loop() {
       Serial.println("LOOP SELESAI");
       ADSMillis = millis();
     }
+    // if(PrepareSelesai){
+    //   digitalWrite(LED_INDX, HIGH);
+    //   Serial.println("Kimim data !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    //     vPengirimanSpreadsheet();
+    //     PrepareSelesai = 0;
+    //   digitalWrite(LED_INDX, LOW);
+    //   Serial.println("Berhasil !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    // }
+    // *
 
+    // vAmbilDataDariSerial2();
 
-    if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
-      // if(millis() - KirimServerMillis >= IntervalKirimServerMillis && !bSedangKirimData){
-      vAmbilDataDariSerial2();
-      //   // vKirimFirebase();
-      //   bSedangKirimData = 1;
-      //   // v_SendFile();
-      //   // bSedangKirimData = 0;
-      //   Serial.println("SELESAI Mengirim File");
-      //   KirimServerMillis = millis();
-      // }
-      // vPembacaanSerial();
-      xSemaphoreGive(sdCardMutex);
-    }
+    // if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
+    //   // if(millis() - KirimServerMillis >= IntervalKirimServerMillis && !bSedangKirimData){
+    //   //   // vKirimFirebase();
+    //   //   bSedangKirimData = 1;
+    //   //   // v_SendFile();
+    //   //   // bSedangKirimData = 0;
+    //   //   Serial.println("SELESAI Mengirim File");
+    //   //   KirimServerMillis = millis();
+    //   // }
+    //   // vPembacaanSerial();
+    //   xSemaphoreGive(sdCardMutex);
+    // }
 }
 
 void v_SendFile() {
   // Use this only for HTTPS
   // client.setInsecure();//skip verification because our server changes rootCA every month or so. Skip this as long as we get certificate we accept
   if (client.connect(serverName, serverPort)) {
-    
+    Serial.print("Awal start :");
+    Serial.println(millis());
+
     unsigned long epochTime = getCurrentTime();
     rtc.setTime(epochTime);
     Serial.println("Connection successful!");
@@ -2405,24 +2414,10 @@ void v_SendFile() {
     Serial.print(headCRC);
     Serial.print(head);
 
-    //Use this for HTTPS because WiFiClientSecure does not provide Stream Type writing
-    // while (file.available()) {
-    //   char c= file.read();
-    //   client.write(c);
-    //   Serial.write(c);
-    // }
-
-
-
-    // while (file.available()) {
-    //     size_t bytesRead = file.read(buffer, bufferSize);
-    //     client.write(buffer, bytesRead);
-    //   Serial.write(buffer, bytesRead);
-    // }
-
     if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
       const size_t bufferSize = 256; // Reduce if needed
       uint8_t buffer[bufferSize];
+      // uint8_t buffer[40][256];
       file = SD.open(fileLocUpload, FILE_READ);
       while (file.available()) {
           size_t bytesRead = file.read(buffer, bufferSize);
@@ -2455,151 +2450,6 @@ void v_SendFile() {
     char httpStatus[4];
     int headerIndex = 0;
     bool statusCaptured = false;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // while ((startTimer + timoutTimer) > millis()) {
-    //   Serial.print(".");
-    //   vTaskDelay(100);
-    //   const size_t BUFFER_SIZE = 256;     // ukuran chunk
-    //   char buf[BUFFER_SIZE];
-    //   int len;
-
-    //   while (client.available()) {
-    //     char c = client.read();
-    //     Serial.print(c);
-
-
-    //      if (c == '\n') {
-    //         headerLine[headerIndex] = '\0';  // end the line
-
-    //         if (!statusCaptured) {
-    //           // Example: "HTTP/1.1 200 OK"
-    //           // Skip "HTTP/1.1 " (9 chars) → status starts at index 9
-    //           strncpy(httpStatus, headerLine + 9, 3);
-    //           httpStatus[3] = '\0';  // null terminate
-    //           statusCaptured = true;
-
-
-    //         }
-
-    //         headerIndex = 0;  // reset for next header
-    //       }
-    //       else if (c != '\r') {
-    //         if (headerIndex < 128 - 1) {
-    //           headerLine[headerIndex++] = c;
-    //         }
-    //       }
-
-    //     if(c == '{'){
-    //       state = true;
-    //     }
-    //     if(state){
-    //       getResponse[getResponseIndex] = c;
-    //       getResponseIndex++;
-    //     }
-    //   }
-    //   if(state == true && !client.available()){
-    //     break;
-    //   }
-
-    // }
-
-    // while ((startTimer + timoutTimer) > millis()) {
-    //     Serial.print(".");
-    //     vTaskDelay(100);
-
-    //     const size_t BUFFER_SIZE = 256;     // ukuran chunk
-    //     char buf[BUFFER_SIZE];
-    //     int len;
-
-    //     while (client.available()) {
-    //       len = client.readBytes(buf, BUFFER_SIZE);  // baca maksimal 256 byte sekali
-
-    //       for (int i = 0; i < len; i++) {
-    //         char c = buf[i];
-    //         Serial.write(c);
-
-    //         // --- parsing header ---
-    //         if (!state) {   // masih di header
-    //           if (c == '\n') {
-    //             headerLine[headerIndex] = '\0';  // akhiri line
-
-    //             if (!statusCaptured) {
-    //               // contoh: "HTTP/1.1 200 OK"
-    //               if (strncmp(headerLine, "HTTP/1.1 ", 9) == 0) {
-    //                 strncpy(httpStatus, headerLine + 9, 3);
-    //                 httpStatus[3] = '\0';
-    //                 statusCaptured = true;
-    //               }
-    //             }
-
-    //             headerIndex = 0;  // reset line buffer
-    //           }
-    //           else if (c != '\r') {
-    //             if (headerIndex < sizeof(headerLine) - 1) {
-    //               headerLine[headerIndex++] = c;
-    //             }
-    //           }
-    //         }
-
-    //         // --- deteksi awal JSON body ---
-    //         if (c == '{') {
-    //           state = true;
-    //         }
-
-    //         // --- simpan body JSON ---
-    //         if (state) {
-    //           if (getResponseIndex < sizeof(getResponse) - 1) {
-    //             getResponse[getResponseIndex++] = c;
-    //             getResponse[getResponseIndex] = '\0';  // null terminate
-    //           } else {
-    //             Serial.println("\n!!! Buffer getResponse penuh, hentikan baca !!!");
-    //             break;
-    //           }
-    //         }
-    //       }
-
-    //       // kasih waktu ke watchdog
-    //       vTaskDelay(1);
-    //     }
-
-    //   // kalau sudah mulai JSON dan tidak ada data lagi, keluar
-    //   if (state == true && !client.available()) {
-    //     break;
-    //   }
-    // }
-
-
-    // Serial.println();
-
-    // bstopLoop = 1;
-    // Serial.print("HTTP Status: ");
-    // Serial.println(httpStatus);  // should print "200"
-
-    // Serial.print("getResponse>> ");
-    // for (int i = 0; i < getResponseIndex; i++){
-    //   Serial.print(getResponse[i]);
-    // }
-    // Serial.println("");
-    //   if (getResponseIndex > 0) {
-    //     // terminasi string
-    //     getResponse[getResponseIndex] = '\0';
-
-    //     // === Panggil fungsi parsing yang sudah kamu buat ===
-    //     vParsingResponseWebV2(getResponse);
-    //   }
-
-
-    // // vParsingResponseWebV2(getResponse);
-
-    // // parseResponse();
-
-    // Serial.println();
-    
-    // client.stop();
-           ////////////////////////////////////////////////////////////////////////// 
-
 
     while ((startTimer + timoutTimer) > millis()) {
       Serial.print(".");
@@ -2747,40 +2597,53 @@ void v_SendFile() {
     }
     vReconnectWifi();
   }
+  Serial.print("Awal start :");
+  Serial.println(millis());
 }
 
-void v_SendFilePart(int index) {
+bool vBacaFileDariSD(const char* fileLocUpload) {
+
+  
+    File file;
+    file = SD.open(fileLocUpload, FILE_READ);
+    if (!file) {
+      Serial.println("Gagal membuka file SD!");
+      return false;
+    }
+
+    Serial.println("Membaca file dari SD...");
+    for (int i = 0; i < ROWS; i++) {
+      if (!file.available()) {
+        bytesPerRow[i] = 0;
+        break;
+      }
+      bytesPerRow[i] = file.read(buffer[i], COL_SIZE);
+    }
+
+    file.close();
+    Serial.println("Pembacaan file selesai.");
+    return true;
+}
+
+void v_SendFileTest() {
+  // Use this only for HTTPS
+  // client.setInsecure();//skip verification because our server changes rootCA every month or so. Skip this as long as we get certificate we accept
   if (client.connect(serverName, serverPort)) {
+    Serial.print("Awal start :");
+    Serial.println(millis());
     
     unsigned long epochTime = getCurrentTime();
     rtc.setTime(epochTime);
     Serial.println("Connection successful!");
     // deleteFile(SD, "/TunnelData.csv");
     // vTulisDataAwalTunnel();
-    // char fileNameUpload[80] = "";
-    // char fileLocUpload[80] = "";
-    // snprintf(fileNameUpload, sizeof(fileNameUpload), "Up_Tunnel_%04d-%02d-%02d.csv",
-    //         currentYear, currentMonth, currentDay);
-    // snprintf(fileLocUpload, sizeof(fileLocUpload), "/Up_Tunnel_%04d-%02d-%02d.csv",
-    //         currentYear, currentMonth, currentDay);
-    // char partLocUpload[80] = "";
-
-    //         snprintf(partLocUpload, sizeof(partLocUpload), "/Up_Tunnel_%04d-%02d-%02d-Part%d.csv",
-    //                 currentYear, currentMonth, currentDay, index+1);
-    //         Serial.println("partLocUpload =");
-    //         Serial.println(partLocUpload);
-
     char fileNameUpload[80] = "";
     char fileLocUpload[80] = "";
-    snprintf(fileNameUpload, sizeof(fileNameUpload), "Up_Tunnel_%04d-%02d-%02d-Part%d.csv",
-            currentYear, currentMonth, currentDay, index+1);
-    snprintf(fileLocUpload, sizeof(fileLocUpload), "/Up_Tunnel_%04d-%02d-%02d-Part%d.csv",
-            currentYear, currentMonth, currentDay, index+1);
-
-    Serial.println("fileNameUpload =");
-    Serial.println(fileNameUpload);
-    Serial.println("fileLocUpload =");
-    Serial.println(fileLocUpload);
+    snprintf(fileNameUpload, sizeof(fileNameUpload), "Up_Tunnel_%04d-%02d-%02d.csv",
+            currentYear, currentMonth, currentDay);
+    snprintf(fileLocUpload, sizeof(fileLocUpload), "/Up_Tunnel_%04d-%02d-%02d.csv",
+            currentYear, currentMonth, currentDay);
+    
 
     // File file = SD.open(fileLocUpload, FILE_READ);
 
@@ -2790,14 +2653,14 @@ void v_SendFilePart(int index) {
     File file;
     String CRC32File;
 
-    if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
+    // if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
 
       file = SD.open(fileLocUpload, FILE_READ);
       CRC32File = vCheckCRCfile(SD, fileLocUpload, 10000);
       file.close();
       // CRC32File = "9e769355";
-      xSemaphoreGive(sdCardMutex);
-    }
+    //   xSemaphoreGive(sdCardMutex);
+    // }
 
     // buffer untuk header
     char headTemp[200];
@@ -2835,12 +2698,298 @@ void v_SendFilePart(int index) {
     // fileLen = file.size();
 
     // readFile(SD,fileLocUpload); 
-    if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
+    // if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
       file = SD.open(fileLocUpload, FILE_READ);
       fileLen = file.size();
       file.close();
-      xSemaphoreGive(sdCardMutex);
+    //   xSemaphoreGive(sdCardMutex);
+    // }
+
+
+    uint32_t extraLen = head.length() + tail.length()+headCRC.length();
+    uint32_t totalLen = fileLen + extraLen;
+
+
+  
+    client.print("POST ");
+    client.print(serverPath);
+    client.println(" HTTP/1.1");
+    Serial.print("POST ");
+    Serial.print(serverPath);
+    Serial.println(" HTTP/1.1");
+    
+    client.print("Host: ");
+    client.println(serverName);
+    Serial.print("Host: ");
+    Serial.println(serverName);
+    
+
+    client.println("Content-Length: " + String(totalLen));
+    Serial.println("Content-Length: " + String(totalLen));
+    
+    client.println("Content-Type: multipart/form-data; boundary=SnoveLab");
+    Serial.println("Content-Type: multipart/form-data; boundary=SnoveLab");
+    
+    client.println();
+    Serial.println();
+    
+    client.print(headCRC);
+    client.print(head);
+    Serial.print(headCRC);
+    Serial.print(head);
+
+    Serial.println("Mengirim data buffer ke client...");
+    size_t totalBytes = 0;
+    for (int i = 0; i < ROWS; i++) {
+      if (bytesPerRow[i] == 0) break; // tidak ada data lagi
+      client.write(buffer[i], bytesPerRow[i]);
+      Serial.write(buffer[i], bytesPerRow[i]);
+      totalBytes += bytesPerRow[i];
     }
+    Serial.print("Selesai kirim buffer. Total byte: ");
+    Serial.println(totalBytes); 
+
+    client.flush();
+    Serial.flush();
+    client.print(tail);
+    Serial.println(tail);
+    // file.close();
+
+    //Uncomment this to view server response
+    
+    int timoutTimer = 10000;
+    unsigned long startTimer = millis();
+    boolean state = false;
+
+    // char getResponse[2048];
+    // int getResponseIndex = 0;
+
+    char headerLine[128];
+    char httpStatus[4];
+    int headerIndex = 0;
+    bool statusCaptured = false;
+
+
+    while ((startTimer + timoutTimer) > millis()) {
+      Serial.print(".");
+      vTaskDelay(100);
+
+      const size_t BUFFER_SIZE = 256;     // ukuran chunk
+      char buf[BUFFER_SIZE];
+      int len;
+
+      while (client.available()) {
+        len = client.readBytes(buf, BUFFER_SIZE);  // baca maksimal 256 byte sekali
+
+        for (int i = 0; i < len; i++) {
+          char c = buf[i];
+          Serial.write(c);
+
+          // --- parsing header ---
+          if (!state) {   // masih di header
+            if (c == '\n') {
+              headerLine[headerIndex] = '\0';  // akhiri line
+
+              if (!statusCaptured) {
+                // contoh: "HTTP/1.1 200 OK"
+                if (strncmp(headerLine, "HTTP/1.1 ", 9) == 0) {
+                  strncpy(httpStatus, headerLine + 9, 3);
+                  httpStatus[3] = '\0';
+                  statusCaptured = true;
+                }
+              }
+              headerIndex = 0;  // reset line buffer
+            }
+            else if (c != '\r') {
+              if (headerIndex < sizeof(headerLine) - 1) {
+                headerLine[headerIndex++] = c;
+              }
+            }
+          }
+
+          // --- deteksi awal JSON body ---
+          if (c == '{') {
+            state = true;
+          }
+
+          // --- simpan body JSON ---
+          if (state) {
+            if (getResponseIndex < sizeof(getResponse) - 1) {
+              getResponse[getResponseIndex++] = c;
+              getResponse[getResponseIndex] = '\0';  // null terminate
+            } else {
+              Serial.println("\n!!! Buffer getResponse penuh, hentikan baca !!!");
+              break;
+            }
+          }
+        }
+
+        // kasih waktu ke watchdog
+        vTaskDelay(1);
+      }
+
+      // kalau sudah mulai JSON dan tidak ada data lagi, keluar
+      if (state == true && !client.available()) {
+        break;
+      }
+    }
+
+    // --- selesai ambil feedback ---
+    Serial.println();
+    Serial.print("HTTP Status: ");
+    Serial.println(httpStatus);
+    int statusCode = atoi(httpStatus); // konversi ke int
+
+    
+
+    Serial.print("getResponse>> ");
+    Serial.println(getResponse);
+
+    
+
+    // tutup koneksi
+    client.stop();
+
+    // RESET semua state biar siap untuk loop berikutnya
+    headerIndex = 0;
+    
+    state = false;
+    statusCaptured = false;
+    httpStatus[0] = '\0';
+    
+
+    Serial.println("=== Feedback selesai & state sudah direset ===");
+
+    // deleteFile(SD, "/TunnelData.csv");
+    // vTulisDataAwalTunnel();
+    
+    // if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
+      if(statusCode != 200){
+        // appendAndReplace(SD, "/TunnelData.csv",  fileLocUpload);
+        char partLocUpload[80] = "";
+        part++;
+        preferences.putInt("part", part);
+        snprintf(partLocUpload, sizeof(partLocUpload), "/Up_Tunnel_%04d-%02d-%02d-Part%d.csv",
+                currentYear, currentMonth, currentDay, part);
+        
+        renameFile(SD, fileLocUpload, partLocUpload );
+        
+      }
+      else {
+        deleteFile(SD, fileLocUpload);
+        // panggil parser kalau ada data
+        if (getResponseIndex > 0) {
+          vParsingResponseWebV2(getResponse); // v_sendfiletest
+        }
+      }
+
+    memset(headerLine, 0, sizeof(headerLine));
+    // memset(getResponse, 0, sizeof(getResponse));
+    memset(getResponse, 0, sizeof(getResponse));
+      
+    //   xSemaphoreGive(sdCardMutex);
+    // }
+    
+    getResponseIndex = 0;
+    bstopLoop = 0;
+    Serial.println("jalankan loop");
+    part = 0;
+    preferences.putInt("part", part);
+
+  } else {
+    
+    Serial.println("Not Connected");
+    refreshWiFi();
+    char fileLocUpload[80] = "";
+    char partLocUpload[80] = "";
+    part++;
+    preferences.putInt("part", part);
+    snprintf(fileLocUpload, sizeof(fileLocUpload), "/Up_Tunnel_%04d-%02d-%02d.csv",
+            currentYear, currentMonth, currentDay);
+
+    snprintf(partLocUpload, sizeof(partLocUpload), "/Up_Tunnel_%04d-%02d-%02d-Part%d.csv",
+            currentYear, currentMonth, currentDay, part);
+    // appendAndReplace(SD, "/TunnelData.csv",  fileLocUpload);
+    
+    // if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
+      renameFile(SD, fileLocUpload, partLocUpload );
+    //   xSemaphoreGive(sdCardMutex);
+    // }
+    vReconnectWifi();
+  }
+  Serial.print("Awal start :");
+  Serial.println(millis());
+}
+
+void v_SendFilePart(int index) {
+  if (client.connect(serverName, serverPort)) {
+    
+    unsigned long epochTime = getCurrentTime();
+    rtc.setTime(epochTime);
+    Serial.println("Connection successful!");
+
+    char fileNameUpload[80] = "";
+    char fileLocUpload[80] = "";
+    snprintf(fileNameUpload, sizeof(fileNameUpload), "Up_Tunnel_%04d-%02d-%02d-Part%d.csv",
+            currentYear, currentMonth, currentDay, index+1);
+    snprintf(fileLocUpload, sizeof(fileLocUpload), "/Up_Tunnel_%04d-%02d-%02d-Part%d.csv",
+            currentYear, currentMonth, currentDay, index+1);
+
+    Serial.println("fileNameUpload =");
+    Serial.println(fileNameUpload);
+    Serial.println("fileLocUpload =");
+    Serial.println(fileLocUpload);
+
+    File file;
+    String CRC32File;
+
+      file = SD.open(fileLocUpload, FILE_READ);
+      CRC32File = vCheckCRCfile(SD, fileLocUpload, 10000);
+      file.close();
+      // CRC32File = "9e769355";
+      // xSemaphoreGive(sdCardMutex);
+
+    // buffer untuk header
+    char headTemp[200];
+    char headCRCTemp[200];
+    char tailTemp[50];
+
+    snprintf(headTemp, sizeof(headTemp),
+            "--SnoveLab\r\n"
+            "Content-Disposition: form-data; name=\"File\"; filename=\"%s\"\r\n"
+            "Content-Type: text/csv\r\n\r\n",
+            fileNameUpload);
+
+    snprintf(headCRCTemp, sizeof(headCRCTemp),
+            "--SnoveLab\r\n"
+            "Content-Disposition: form-data; name=\"CRC32\"\r\n\r\n%s\r\n",
+            CRC32File.c_str());
+
+    snprintf(tailTemp, sizeof(tailTemp),
+            "\r\n--SnoveLab--\r\n");
+
+
+    String head = String(headTemp);
+    String headCRC = String(headCRCTemp);
+    String tail = String(tailTemp);
+
+    Serial.println("head");
+    Serial.println(head);
+    Serial.println("headCRC");
+    Serial.println(headCRC);
+    Serial.println("tail");
+    Serial.println(tail);
+    
+
+    // readFile(SD,fileLocUpload); 
+    // fileLen = file.size();
+
+    // readFile(SD,fileLocUpload); 
+
+      file = SD.open(fileLocUpload, FILE_READ);
+      fileLen = file.size();
+      file.close();
+      // xSemaphoreGive(sdCardMutex);
 
 
     uint32_t extraLen = head.length() + tail.length()+headCRC.length();
@@ -2882,26 +3031,18 @@ void v_SendFilePart(int index) {
     //   Serial.write(c);
     // }
 
-    const size_t bufferSize = 256; // Reduce if needed
-    uint8_t buffer[bufferSize];
-
-
-    // while (file.available()) {
-    //     size_t bytesRead = file.read(buffer, bufferSize);
-    //     client.write(buffer, bytesRead);
-    //   Serial.write(buffer, bytesRead);
-    // }
-
-    if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
-      file = SD.open(fileLocUpload, FILE_READ);
-      while (file.available()) {
-          size_t bytesRead = file.read(buffer, bufferSize);
-          client.write(buffer, bytesRead);
-        Serial.write(buffer, bytesRead);
-      }
-      file.close();
-      xSemaphoreGive(sdCardMutex);
+    Serial.println("Mengirim data buffer ke client...");
+    size_t totalBytes = 0;
+    for (int i = 0; i < ROWS; i++) {
+      if (bytesPerRow[i] == 0) break; // tidak ada data lagi
+      client.write(buffer[i], bytesPerRow[i]);
+      Serial.write(buffer[i], bytesPerRow[i]);
+      totalBytes += bytesPerRow[i];
     }
+    Serial.print("Selesai kirim buffer. Total byte: ");
+    Serial.println(totalBytes); 
+
+
     //Use this for HTTP
     // client.write(file);
 
@@ -3017,9 +3158,7 @@ void v_SendFilePart(int index) {
     state = false;
     statusCaptured = false;
     httpStatus[0] = '\0';
-    memset(headerLine, 0, sizeof(headerLine));
-    // memset(getResponse, 0, sizeof(getResponse));
-    memset(getResponse, 0, sizeof(getResponse));
+    
     getResponseIndex = 0;
 
     Serial.println("=== Feedback selesai & state sudah direset ===");
@@ -3030,15 +3169,11 @@ void v_SendFilePart(int index) {
     if(statusCode != 200){
       // appendAndReplace(SD, "/TunnelData.csv",  fileLocUpload);
     }else{
-
-      if(xSemaphoreTake(sdCardMutex, pdMS_TO_TICKS(50000)) == pdTRUE){
-
-        deleteFile(SD, fileLocUpload);
-        xSemaphoreGive(sdCardMutex);
-
-      }
+      deleteFile(SD, fileLocUpload);
     }
-    
+    memset(headerLine, 0, sizeof(headerLine));
+    // memset(getResponse, 0, sizeof(getResponse));
+    memset(getResponse, 0, sizeof(getResponse));
     bstopLoop = 0;
     Serial.println("jalankan loop");
 
@@ -3090,8 +3225,9 @@ void vParsingResponseWebV2(const char* jsonResponse){
   String crc32web;
 
   // Parse JSON
-  DynamicJsonDocument doc(4096);
+  // DynamicJsonDocument doc(4096);
   DeserializationError error = deserializeJson(doc, jsonResponse);
+
   if (error) {
     Serial.print(F("Failed to parse JSON: "));
     Serial.println(error.f_str());
@@ -3168,8 +3304,5 @@ void vParsingResponseWebV2(const char* jsonResponse){
                   i, fCalTempM[i], fCalHumB[i], fCalPresM[i], fCalVeloM[i], fCalHumM[i], fCalVeloB[i], fCalTempB[i], fCalPresB[i], fCalBatS[i]);
   }
   Serial.println(" ");
-
+  doc.clear();
 }
-
-
-
