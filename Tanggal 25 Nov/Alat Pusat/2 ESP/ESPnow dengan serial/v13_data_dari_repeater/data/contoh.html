@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Monitoring Suhu - BME280</title>
+  <script src="/highcharts.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #d9e2ec);
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      background-color: #2f80ed;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    main {
+      padding: 30px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .chart-container {
+      margin-bottom: 30px;
+    }
+
+    .chart-box {
+      width: 100%;
+      height: 400px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 10px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      color: #777;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Monitoring Suhu Real-Time dari BME280</h2>
+  </header>
+
+  <main>
+    <div class="chart-container">
+      <div id="chart1" class="chart-box"></div>
+    </div>
+    <div class="chart-container">
+      <div id="chart2" class="chart-box"></div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 | Sistem Monitoring Suhu ESP32
+  </footer>
+
+  <script>
+    Highcharts.setOptions({ time: { useUTC: false } });
+
+    const chart1 = Highcharts.chart('chart1', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Suhu Real-Time - Chart 1' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { title: { text: 'Suhu (°C)' } },
+      tooltip: {
+        xDateFormat: '%H:%M:%S',
+        shared: true
+      },
+      series: [{ name: 'Suhu', data: [] }]
+    });
+
+    const chart2 = Highcharts.chart('chart2', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Multi-Data Sensor - Chart 2' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { title: { text: 'Nilai' } },
+      tooltip: {
+        xDateFormat: '%H:%M:%S',
+        shared: true
+      },
+      series: [
+        { name: 'Suhu (°C)', data: [] },
+        { name: 'Kelembapan (%)', data: [] },
+        { name: 'Tekanan (hPa)', data: [] },
+        { name: 'Ketinggian (m)', data: [] },
+        { name: 'Indeks Kualitas', data: [] }
+      ]
+    });
+
+    async function fetchData() {
+      try {
+        const res = await fetch('/data');
+        const data = await res.json();
+        const x = (new Date()).getTime();
+
+        // Data utama chart1
+        chart1.series[0].addPoint([x, data.temperature], true, chart1.series[0].data.length > 30);
+
+        // Data untuk chart2 (5 series)
+        const maxPoints = 30;
+        chart2.series[0].addPoint([x, data.temperature], true, chart2.series[0].data.length > maxPoints);
+        chart2.series[1].addPoint([x, data.humidity], true, chart2.series[1].data.length > maxPoints);
+        chart2.series[2].addPoint([x, data.pressure], true, chart2.series[2].data.length > maxPoints);
+        chart2.series[3].addPoint([x, data.altitude], true, chart2.series[3].data.length > maxPoints);
+        chart2.series[4].addPoint([x, data.indexKualitas || Math.random() * 100], true, chart2.series[4].data.length > maxPoints);
+
+      } catch (error) {
+        console.error('Gagal mengambil data:', error);
+      }
+    }
+
+    setInterval(fetchData, 2000);
+  </script>
+</body>
+</html>

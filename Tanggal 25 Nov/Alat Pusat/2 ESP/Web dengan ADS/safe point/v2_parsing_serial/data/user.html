@@ -1,0 +1,607 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Monitoring Tunnel</title>
+  <!-- <script src="/highcharts.js"></script>
+  <script src="/data.js"></script>
+  <script src="/accessibility.js"></script>
+  <script src="/exporting.js"></script>
+  <script src="/export-data.js"></script> -->
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/data.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/export-data.js"></script>
+  <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+  <!-- <script src="SuhuData.js"></script>
+  <script src="WindData.js"></script>
+  <script src="HumidData.js"></script>
+  <script src="TekananData.js"></script> -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #d9e2ec);
+      margin: 0;
+      padding: 0px;
+      color: #333;
+    }
+
+    header {
+      background-color: #2f80ed;
+      color: white;
+      padding: 30px 0;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    h2 { margin: 0; font-size: 24px; }
+    main { max-width: 1200px; margin: auto; }
+
+    .chart-container {
+      margin-top: 30px;
+      margin-bottom: 30px;
+    }
+
+    .chart-box {
+      width: 100%;
+      height: 400px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 00px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    form, .control-section {
+      margin: 20px 0;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      justify-content: center;
+      align-items: center;
+    }
+
+    input, button, select {
+      padding: 8px;
+      margin: 5px;
+      font-size: 14px;
+    }
+
+    hr { margin-top: 20px; margin-bottom: 20px; }
+
+    .heater-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        margin: 20px auto;
+    }
+
+    .heater-card {
+        flex: 1 1 300px; /* fleksibel min 300px */
+        max-width: 380px;
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .highcharts-contextmenu {
+        max-height: 200px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        z-index: 9999 !important;
+    }
+
+
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Monitoring Tunnel</h2>
+  </header>
+
+  <main>
+    <div class="chart-container"><div id="chart1" class="chart-box"></div></div>
+    <div class="chart-container"><div id="chart4" class="chart-box"></div></div>
+    <div class="chart-container"><div id="chart3" class="chart-box"></div></div>
+    <div class="chart-container"><div id="chart2" class="chart-box"></div></div>
+    
+
+    <!-- Form Kontrol dan Kalibrasi -->
+    <div style="text-align: center; max-width: 1200px; margin: 0 auto;">
+
+    <!-- <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1200px; margin: 0 auto;"> -->
+      <div style="
+      display: grid; 
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 20px; 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      justify-content: center; 
+      align-items: start; 
+      text-align: center;">
+
+      <!-- <div class="control-section">
+        <h3>ESP32 Web Server Calibration</h3>
+
+        <p><b>Set Power Fan:</b></p>
+        <form action="/get">
+          <input type="number" name="In_Suhu_Max" placeholder="Set Power Fan">
+          <input type="submit" value="Submit">
+        </form>
+        <p>Power = <span id="Watt">0</span> WATT</p>
+        <p>Kecepatan = <span id="Kecepatan">0</span> %</p>
+      </div> -->
+
+        <!-- Atas kiri -->
+        <div class="control-section">
+          <h3>Power Fan 1</h3>
+          <form action="/get">
+            <input type="number" name="In_Watt_Max1" placeholder="Set Power Fan 1">
+            <input type="submit" value="Submit">
+          </form>
+          <p>Power 1 = <span id="Watt1">0</span> WATT</p>
+          <p>Kecepatan 1 = <span id="Kecepatan1">0</span> %</p>
+        </div>
+
+        <!-- Atas kanan -->
+        <div class="control-section">
+          <h3>Power Fan 2</h3>
+          <form action="/get">
+            <input type="number" name="In_Watt_Max2" placeholder="Set Power Fan 2">
+            <input type="submit" value="Submit">
+          </form>
+          <p>Power 2 = <span id="Watt2">0</span> WATT</p>
+          <p>Kecepatan 2 = <span id="Kecepatan2">0</span> %</p>
+        </div>
+
+        <!-- Bawah kiri -->
+        <div class="control-section">
+          <h3>Power Fan 3</h3>
+          <form action="/get">
+            <input type="number" name="In_Watt_Max3" placeholder="Set Power Fan 3">
+            <input type="submit" value="Submit">
+          </form>
+          <p>Power 3 = <span id="Watt3">0</span> WATT</p>
+          <p>Kecepatan 3 = <span id="Kecepatan3">0</span> %</p>
+        </div>
+
+        <!-- Bawah kanan -->
+        <div class="control-section">
+          <h3>Power Fan 4</h3>
+          <form action="/get">
+            <input type="number" name="In_Watt_Max4" placeholder="Set Power Fan 4">
+            <input type="submit" value="Submit">
+          </form>
+          <p>Power 4 = <span id="Watt4">0</span> WATT</p>
+          <p>Kecepatan 4 = <span id="Kecepatan4">0</span> %</p>
+        </div>
+      </div>
+
+      <div class="heater-row">
+        <!-- Heater 1 -->
+        <div class="heater-card">
+          <h3>Heater 1</h3>
+          <p><b>Lock Power Heater:</b></p>
+          <form action="/get">
+            <select name="In_Lock_1">
+              <option value="1">Locked</option>
+              <option value="0">Unlocked</option>
+            </select>
+            <input type="submit" value="Submit">
+          </form>
+          <p>Heater Power = <span id="Lock_1">-</span></p>
+          <hr>
+          <p><b>Fan Power:</b></p>
+          <form action="/get">
+            <label for="In_Fan_Power1">Fan :</label>
+            <select name="In_Fan_Power1" id="In_Fan_Power1">
+              <option value="1">Max</option>
+              <option value="0">OFF</option>
+            </select>
+            <input type="submit" value="Submit">
+          </form>
+          <p>Fan = <span id="Fan_Power1">-</span></p>
+          <hr>
+          <p><b>Set Heater Power:</b></p>
+          <p>Status Fan: <span id="Fan_Status1">-</span></p> <!-- Tambahan -->
+          <!-- <form action="/get">
+            <input type="number" name="In_Power_Tunnel1" placeholder="Input Power Heater">
+            <input type="submit" value="Submit">
+          </form> -->
+          <p>Power = <span id="Power_Tunnel1">0</span> %</p>
+          <hr>
+          <p>Input Set Point</p>
+              <form action="/get" target="hidden-form">
+              <input type="number" name="In_sp1" step="0.00001" placeholder="Input nilai Kalibrasi ">
+              <input type="submit" value="Submit">
+              </form>
+              <iframe style="display: none;" name="hidden-form"></iframe>
+          <p>Nilai = <span id="SetPointSpan1">1.00000</span></p>         
+  
+        </div>
+        
+        <!-- Heater 2 -->
+        <div class="heater-card">
+          <h3>Heater 2</h3>
+          <p><b>Lock Power Heater:</b></p>
+          <form action="/get">
+            <select name="In_Lock_2">
+              <option value="1">Locked</option>
+              <option value="0">Unlocked</option>
+            </select>
+            <input type="submit" value="Submit">
+          </form>
+          <p>Heater Power = <span id="Lock_2">-</span></p>
+          <hr>
+          <p><b>Fan Power:</b></p>
+          <form action="/get">
+            <label for="In_Fan_Power2">Fan :</label>
+            <select name="In_Fan_Power2" id="In_Fan_Power2">
+              <option value="1">Max</option>
+              <option value="0">OFF</option>
+            </select>
+            <input type="submit" value="Submit">
+          </form>
+          <p>Fan = <span id="Fan_Power2">-</span></p>
+          <hr>
+          <p><b>Set Heater Power:</b></p>
+          <p>Status Fan: <span id="Fan_Status2">-</span></p> <!-- Tambahan -->
+          <!-- <form action="/get">
+            <input type="number" name="In_Power_Tunnel2" placeholder="Input Power Heater">
+            <input type="submit" value="Submit">
+          </form> -->
+          <p>Power = <span id="Power_Tunnel2">0</span> %</p>
+          <hr>
+          <p>Input Set Point</p>
+              <form action="/get" target="hidden-form">
+              <input type="number" name="In_sp2" step="0.00001" placeholder="Input nilai Kalibrasi ">
+              <input type="submit" value="Submit">
+              </form>
+              <iframe style="display: none;" name="hidden-form"></iframe>
+          <p>Nilai = <span id="SetPointSpan2">1.00000</span></p>
+
+        </div>
+      
+        <!-- Heater 3 -->
+        <div class="heater-card">
+          <h3>Heater 3</h3>
+          <p><b>Lock Power Heater:</b></p>
+          <form action="/get">
+            <select name="In_Lock_3">
+              <option value="1">Locked</option>
+              <option value="0">Unlocked</option>
+            </select>
+            <input type="submit" value="Submit">
+          </form>
+          <p>Heater Power = <span id="Lock_3">-</span></p>
+          <hr>
+          <p><b>Fan Power:</b></p>
+          <form action="/get">
+            <label for="In_Fan_Power3">Fan :</label>
+            <select name="In_Fan_Power3" id="In_Fan_Power3">
+              <option value="1">Max</option>
+              <option value="0">OFF</option>
+            </select>
+            <input type="submit" value="Submit">
+          </form>
+          <p>Fan = <span id="Fan_Power3">-</span></p>
+          <hr>
+          <p><b>Set Heater Power:</b></p>
+          <p>Status Fan: <span id="Fan_Status3">-</span></p> <!-- Tambahan -->
+          <!-- <form action="/get">
+            <input type="number" name="In_Power_Tunnel3" placeholder="Input Power Heater">
+            <input type="submit" value="Submit">
+          </form> -->
+          <p>Power = <span id="Power_Tunnel3">0</span> %</p>
+          <hr>
+          <p>Input Set Point</p>
+              <form action="/get" target="hidden-form">
+              <input type="number" name="In_sp3" step="0.00001" placeholder="Input nilai Kalibrasi ">
+              <input type="submit" value="Submit">
+              </form>
+              <iframe style="display: none;" name="hidden-form"></iframe>
+          <p>Nilai = <span id="SetPointSpan3">1.00000</span></p>
+
+        </div>
+      </div>
+
+
+    <div style="
+        display: grid; 
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 20px; 
+        max-width: 1200px; 
+        margin: 0 auto; 
+        justify-content: center; 
+        align-items: start; 
+        text-align: center;">
+
+      <div class="control-section">
+        <p><b>Menu Kontrol Sistem</b></p>
+        <button onclick="window.location.href='/controling'">Ke Halaman Kontrol</button>
+      </div>
+
+      <div class="control-section">
+        <p><b>Setting MAC Address</b></p>
+        <button onclick="window.location.href='/MAC'">Ke Settingan MAC Address</button>
+      </div>
+      
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 | Sistem Monitoring Tunnel ESP32
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    Highcharts.setOptions({ time: { useUTC: false } });
+
+    const chart2 = Highcharts.chart('chart2', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Tekanan (SDP810)' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { title: { text: 'Tekanan' } },
+      data: {
+              enablePolling: true,
+              
+          },
+      tooltip: { xDateFormat: '%H:%M:%S', shared: true },
+      series: [
+        { name: 'Tekanan Pipa 1', data: [] },
+        { name: 'Tekanan Pipa 2', data: [] }
+      ]
+    });
+
+    const chart1 = Highcharts.chart('chart1', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Suhu Tunnel' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { 
+        title: { text: 'Suhu (°C)' },
+        plotLines: [{
+          id: 'target-line',
+          value: 0, // ubah ke nilai target suhu yang ingin ditandai
+          color: 'red',
+          dashStyle: 'Dash',
+          width: 2,
+          label: {
+            // text: 'Target',
+            align: 'right',
+            style: {
+              color: 'red',
+              fontWeight: 'bold'
+            }
+          }
+        }]
+      },
+      data: {
+              enablePolling: true,
+              
+          },
+      tooltip: { xDateFormat: '%H:%M:%S', shared: true },
+      series: [
+        { name: 'Suhu Ujung Pipa 1', data: [] },
+        { name: 'Suhu Ujung Pipa 2', data: [] },
+        { name: 'Suhu 1', data: [] },
+        { name: 'Suhu 2', data: [] },
+        { name: 'Suhu 3', data: [] },
+        { name: 'Suhu 4', data: [] },
+        { name: 'Suhu 5', data: [] },
+        { name: 'Suhu 6', data: [] },
+        { name: 'Suhu 7', data: [] },
+        { name: 'Suhu Dinding 1', data: [] },
+        { name: 'Suhu Dinding 2', data: [] },
+        { name: 'Suhu Dinding 3', data: [] },
+        { name: 'Suhu Pipa 1', data: [] },
+        { name: 'Suhu Pipa 2', data: [] },
+        { name: 'Suhu Pipa 3', data: [] }
+      ]
+    });
+
+    const chart3 = Highcharts.chart('chart3', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Kecepatan Udara Tunnel' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { title: { text: 'm/s' } },
+      data: {
+              enablePolling: true,
+              
+          },
+      tooltip: { xDateFormat: '%H:%M:%S', shared: true },
+      series: [
+        { name: 'Kecepatan Ujung Pipa 1', data: [] },
+        { name: 'Kecepatan Ujung Pipa 2', data: [] },
+        { name: 'Kecepatan 1', data: [] },
+        { name: 'Kecepatan 2', data: [] },
+        { name: 'Kecepatan 3', data: [] },
+        { name: 'Kecepatan 4', data: [] },
+        { name: 'Kecepatan 5', data: [] },
+        { name: 'Kecepatan 6', data: [] },
+        { name: 'Kecepatan 7', data: [] }
+      ]
+    });
+
+    const chart4 = Highcharts.chart('chart4', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Humidity Tunnel' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { title: { text: 'Kelembapan' } },
+      data: {
+              enablePolling: true,
+              
+          },
+      tooltip: { xDateFormat: '%H:%M:%S', shared: true },
+      series: [
+        { name: 'Kelembapan Ujung Pipa 1', data: [] },
+        { name: 'Kelembapan Ujung Pipa 2', data: [] },
+        { name: 'Kelembapan 1', data: [] },
+        { name: 'Kelembapan 2', data: [] },
+        { name: 'Kelembapan 3', data: [] },
+        { name: 'Kelembapan 4', data: [] },
+        { name: 'Kelembapan 5', data: [] },
+        { name: 'Kelembapan 6', data: [] },
+        { name: 'Kelembapan 7', data: [] }
+      ]
+    });
+
+    
+
+    async function fetchData() {
+      try {
+        const res = await fetch('/data');
+        const data = await res.json();
+        const x = Date.now();
+        const y = data.temperature;
+
+        chart2.series[0].addPoint([x, data.USDP1]);
+        chart2.series[1].addPoint([x, data.USDP2]);
+
+        // Jika data.suhu adalah array
+        chart1.series[0].addPoint([x, data.Usuhu1]);
+        chart1.series[1].addPoint([x, data.Usuhu2]);
+        chart1.series[2].addPoint([x, data.suhu1]);
+        chart1.series[3].addPoint([x, data.suhu2]);
+        chart1.series[4].addPoint([x, data.suhu3]);
+        chart1.series[5].addPoint([x, data.suhu4]);
+        chart1.series[6].addPoint([x, data.suhu5]);
+        chart1.series[7].addPoint([x, data.suhu6]);
+        chart1.series[8].addPoint([x, data.suhu7]);
+
+        chart1.series[9].addPoint([x, data.Dsuhu1]);
+        chart1.series[10].addPoint([x, data.Dsuhu2]);
+        chart1.series[11].addPoint([x, data.Dsuhu3]);
+
+        chart1.series[12].addPoint([x, data.Psuhu1]);
+        chart1.series[13].addPoint([x, data.Psuhu2]);
+        chart1.series[14].addPoint([x, data.Psuhu3]);
+
+        chart3.series[0].addPoint([x, data.Ukec1]);
+        chart3.series[1].addPoint([x, data.Ukec2]);
+        chart3.series[2].addPoint([x, data.kec1]);
+        chart3.series[3].addPoint([x, data.kec2]);
+        chart3.series[4].addPoint([x, data.kec3]);
+        chart3.series[5].addPoint([x, data.kec4]);
+        chart3.series[6].addPoint([x, data.kec5]);
+        chart3.series[7].addPoint([x, data.kec6]);
+        chart3.series[8].addPoint([x, data.kec7]);
+
+        chart4.series[0].addPoint([x, data.UHumid1]);
+        chart4.series[1].addPoint([x, data.UHumid2]);
+        chart4.series[2].addPoint([x, data.Humid1]);
+        chart4.series[3].addPoint([x, data.Humid2]);
+        chart4.series[4].addPoint([x, data.Humid3]);
+        chart4.series[5].addPoint([x, data.Humid4]);
+        chart4.series[6].addPoint([x, data.Humid5]);
+        chart4.series[7].addPoint([x, data.Humid6]);
+        chart4.series[8].addPoint([x, data.Humid7]);
+
+      } catch (error) {
+        console.error('Gagal mengambil data:', error);
+      }
+    }
+
+    setInterval(fetchData, 5000);
+
+    // Ambil data settingan realtime
+    setInterval(function () {
+      const xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          const data = this.responseText.split(',');
+
+          // Watt
+          document.getElementById("Watt1").innerHTML = data[0];
+          document.getElementById("Watt2").innerHTML = data[1];
+          document.getElementById("Watt3").innerHTML = data[2];
+          document.getElementById("Watt4").innerHTML = data[3];
+
+          // Kecepatan
+          document.getElementById("Kecepatan1").innerHTML = data[4];
+          document.getElementById("Kecepatan2").innerHTML = data[5];
+          document.getElementById("Kecepatan3").innerHTML = data[6];
+          document.getElementById("Kecepatan4").innerHTML = data[7];
+
+          // Power Tunnel
+          document.getElementById("Power_Tunnel1").innerHTML = data[8];
+          document.getElementById("Power_Tunnel2").innerHTML = data[9];
+          document.getElementById("Power_Tunnel3").innerHTML = data[10];
+
+          // Heater State
+          document.getElementById("Lock_1").innerHTML = (data[11] === "1") ? "Locked" : "Unlocked";
+          document.getElementById("Lock_2").innerHTML = (data[12] === "1") ? "Locked" : "Unlocked";
+          document.getElementById("Lock_3").innerHTML = (data[13] === "1") ? "Locked" : "Unlocked";
+
+          // Fan Power
+          document.getElementById("Fan_Power1").innerHTML = (data[14] === "1") ? "MAX" : "OFF";
+          document.getElementById("Fan_Power2").innerHTML = (data[15] === "1") ? "MAX" : "OFF";
+          document.getElementById("Fan_Power3").innerHTML = (data[16] === "1") ? "MAX" : "OFF";
+
+          // SetPoint
+          document.getElementById("SetPointSpan1").innerHTML = data[17];
+          document.getElementById("SetPointSpan2").innerHTML = data[18];
+          document.getElementById("SetPointSpan3").innerHTML = data[19];
+
+          // WCS State
+          WCS_state1 = parseInt(data[20]);
+          WCS_state2 = parseInt(data[21]);
+          WCS_state3 = parseInt(data[22]);
+
+
+
+          const fan1 = document.getElementById("Fan_Status1");
+          if (fan1) fan1.innerHTML = (WCS_state1 === 1) ? "Mati" : "Hidup";
+
+          const fan2 = document.getElementById("Fan_Status2");
+          if (fan2) fan2.innerHTML = (WCS_state2 === 1) ? "Mati" : "Hidup";
+
+          const fan3 = document.getElementById("Fan_Status3");
+          if (fan3) fan3.innerHTML = (WCS_state3 === 1) ? "Mati" : "Hidup";
+
+          const targetSuhu = parseFloat(data[17]);
+
+          if (!isNaN(targetSuhu)) {
+            chart1.yAxis[0].removePlotLine('target-line'); // hapus garis lama
+            chart1.yAxis[0].addPlotLine({
+              id: 'target-line',
+              value: targetSuhu,
+              color: 'red',
+              dashStyle: 'Dash',
+              width: 2,
+              label: {
+                text: 'Target ' + targetSuhu + '°C',
+                align: 'right',
+                x: -10,
+                style: { color: 'red', fontWeight: 'bold' }
+              }
+            });
+          }
+
+        }
+      };
+      xhttp.open("GET", "/dataSet", true);
+      xhttp.send();
+    }, 1000);
+
+    function updateServer() {
+      const xhttp = new XMLHttpRequest();
+      xhttp.open("GET", "/updateServer", true);
+      xhttp.send();
+    }
+  </script>
+</body>
+</html>

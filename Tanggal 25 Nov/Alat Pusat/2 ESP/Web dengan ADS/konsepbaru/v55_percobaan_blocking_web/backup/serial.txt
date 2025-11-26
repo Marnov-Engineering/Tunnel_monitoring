@@ -1,0 +1,20 @@
+
+x-powered-by: Express
+content-type: application/json; charset=utf-8
+etag: W/"6b6-W7UynqWSQcWhyM+Zc+1rqdzT9rc"
+function-execution-id: bfse8sjosxqs
+x-cloud-trace-context: 5e85ddfca7dc921332fe96d6bf948087;o=1
+date: Mon, 01 Sep 2025 03:46:10 GMT
+server: Google Frontend
+Content-Length: 1718
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+
+{"lastVersion":"1","totalNode":0,"totalRepeater":0,"calBatPusat":"1","timeReportPeriodic":"1","timePeriodicSensor":"1","jumlahSensor":9,"crc32web":"50cd7712","sensor":{"0":{"id":"1","sensor":"Sensor Tunnel 1","calTempB":"0","calHumB":"0","calTempM":"1","calVelB":"0","calPresB":"0","calPresM":"1","calHumM":"1","calBat":"1","calVelM":"1"},"1":{"calTempM":"1","calPresB":"0","calHumB":"0","calTempB":"0","calBat":"1","calPresM":"1","id":"2","calVelB":"0","sensor":"Sensor Tunnel 2","calHumM":"1","calVelM":"1"},"2":{"calBat":"1","calPresB":"0","calVelB":"0","calTempB":"0","sensor":"Sensor Tunnel 3","calPresM":"1","calHumM":"1","calTempM":"1","calHumB":"0","id":"3","calVelM":"1"},"3":{"calTempB":"0","sensor":"Sensor Tunnel 4","id":"4","calVelB":"0","calPresM":"1","calBat":"1","calVelM":"1","calTempM":"1","calHumB":"0","calHumM":"1","calPresB":"0"},"4":{"calHumB":"0","calVelM":"1","calPresM":"1","calPresB":"0","sensor":"Sensor Tunnel 5","calHumM":"1","calBat":"1","calTempB":"0","calVelB":"0","calTempM":"1","id":"5"},"5":{"calTempB":"0","calHumB":"0","calBat":"1","calVelM":"1","calVelB":"0","calPresM":"1","calTempM":"1","id":"6","sensor":"Sensor Tunnel 6","calPresB":"0","calHumM":"1"},"6":{"calHumM":"1","calPresM":"1","calVelM":"1","id":"7","sensor":"Sensor Tunnel 7","calPresB":"0","calTempM":"1","calVelB":"0","calHumB":"0","calBat":"1","calTempB":"0"},"7":{"sensor":"Sensor Pipa 1","calPresB":"0","calHumB":"0","calTempB":"0","id":"8","calVelM":"1","calVelB":"0","calPresM":"1","calTempM":"1","calBat":"1","calHumM":"1"},"8":{"calTempM":"1","calVelB":"0","calBat":"1","calVelM":"1","calTempB":"0","id":"9","sensor":"Sensor Pipa 2","calHumM":"1","calPresM":"1","calPresB":"0","calHumB":"0"}},"repeater":{}}
+HTTP Status: 200
+getResponse>> {"lastVersion":"1","totalNode":0,"totalRepeater":0,"calBatPusat":"1","timeReportPeriodic":"1","timePeriodicSensor":"1","jumlahSensor":9,"crc32web":"50cd7712","sensor":{"0":{"id":"1","sensor":"Sensor Tunnel 1","calTempB":"0","calHumB":"0","calTempM":"1","calVelB":"0","calPresB":"0","calPresM":"1","calHumM":"1","calBat":"1","calVelM":"1"},"1":{"calTempM":"1","calPresB":"0","calHumB":"0","calTempB":"0","calBat":"1","calPresM":"1","id":"2","calVelB":"0","sensor":"Sensor Tunnel 2","calHumM":"1","calVelM":"1"},"2":{"calBat":"1","calPresB":"0","calVelB":"0","calTempB":"0","sensor":"Sensor Tunnel 3","calPresM":"1","calHumM":"1","calTempM":"1","calHumB":"0","id":"3","calVelM":"1"},"3":{"calTempB":"0","sensor":"Sensor Tunnel 4","id":"4","calVelB":"0","calPresM":"1","calBat":"1","calVelM":"1","calTempM":"1","calHumB":"0","calHumM":"1","calPresB":"0"},"4":{"calHumB":"0","calVelM":"1","calPresM":"1","calPresB":"0","sensor":"Sensor Tunnel 5","calHumM":"1","calBat":"1","calTempB":"0","calVelB":"0","calTempM":"1","id":"5"},"5":{"calTempB":"0","calHumB":"0","calBat":"1","calVelM":"1","calVelB":"0","calPresM":"1","calTempM":"1","id":"6","sensor":"Sensor Tunnel 6","calPresB":"0","calHumM":"1"},"6":{"calHumM":"1","calPresM":"1","calVelM":"1","id":"7","sensor":"Sensor Tunnel 7","calPresB":"0","calTempM":"1","calVelB":"0","calHumB":"0","calBat":"1","calTempB":"0"},"7":{"sensor":"Sensor Pipa 1","calPresB":"0","calHumB":"0","calTempB":"0","id":"8","calVelM":"1","calVelB":"0","calPresM":"1","calTempM":"1","calBat":"1","calHumM":"1"},"8":{"calTempM":"1","calVelB":"0","calBat":"1","calVelM":"1","calTempB":"0","id":"9","sensor":"Sensor Pipa 2","calHumM":"1","calPresM":"1","calPresB":"0","calHumB":"0"}},"repeater":{}}
+Deleting file: /TunnelData.csv
+File deleted
+Deleting file: /Up_Tunnel_2025-09-01.csv
+File deleted
+File doens't exist
+Creating file...

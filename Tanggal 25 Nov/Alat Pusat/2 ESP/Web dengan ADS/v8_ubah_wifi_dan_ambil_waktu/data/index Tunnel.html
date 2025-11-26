@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Monitoring Tunnel</title>
+  <script src="/highcharts.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #d9e2ec);
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    header {
+      background-color: #2f80ed;
+      color: white;
+      padding: 30px 0;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    h2 { margin: 0; font-size: 24px; }
+    main { max-width: 900px; margin: auto; }
+
+    .chart-container {
+      margin-bottom: 30px;
+    }
+
+    .chart-box {
+      width: 100%;
+      height: 400px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 10px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    form, .control-section {
+      margin: 20px 0;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      justify-content: center;
+      align-items: center;
+    }
+
+    input, button, select {
+      padding: 8px;
+      margin: 5px;
+      font-size: 14px;
+    }
+
+    hr { margin-top: 20px; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Monitoring Tunnel</h2>
+  </header>
+
+  <main>
+    <div class="chart-container"><div id="chart1" class="chart-box"></div></div>
+    <div class="chart-container"><div id="chart3" class="chart-box"></div></div>
+    <div class="chart-container"><div id="chart2" class="chart-box"></div></div>
+
+    <!-- Form Kontrol dan Kalibrasi -->
+    <div style="text-align: center; max-width: 500px; margin: 0 auto;">
+      <div class="control-section">
+        <h3>ESP32 Web Server Calibration</h3>
+
+        <p><b>Set Power Fan:</b></p>
+        <form action="/get">
+          <input type="number" name="In_Suhu_Max" placeholder="Set Power Fan">
+          <input type="submit" value="Submit">
+        </form>
+        <p>Power = <span id="Watt">0</span> WATT</p>
+        <p>Kecepatan = <span id="Kecepatan">0</span> %</p>
+      </div>
+
+      <div class="control-section">
+        <p><b>Safety:</b></p>
+        <form action="/get">
+          <label for="In_Rref">Safety :</label>
+          <select name="In_Rref" id="In_Rref">
+            <option value="1">Arm</option>
+            <option value="0">Disarm</option>
+          </select>
+          <input type="submit" value="Submit">
+        </form>
+        <p>Safety = <span id="Safety">-</span></p>
+      </div>
+
+      <div class="control-section">
+
+        <p><b>Arus INA219:</b></p>
+        <p>Arus = <span id="Arus">0</span> A</p>
+
+        <p>Input Kalibrasi Sensor INA219 (y = mx + b)</p>
+        <form action="/get">
+          <input type="number" name="In_CalM1" step="0.00001" placeholder="Input M">
+          <input type="submit" value="Submit">
+        </form>
+        <form action="/get">
+          <input type="number" name="In_CalB1" step="0.00001" placeholder="Input B">
+          <input type="submit" value="Submit">
+        </form>
+        <p>Nilai M = <span id="CalM1">1.00000</span>, Nilai B = <span id="CalB1">0.00000</span></p>
+
+      </div>
+      
+      <div class="control-section">
+        <p><b>Menu Kontrol Sistem</b></p>
+        <button onclick="window.location.href='/controling'">Ke Halaman Kontrol</button>
+      </div>
+  
+      
+      <div class="control-section">
+
+        <p><b>OTA</b></p>
+        <button onclick="updateServer()">Update Server</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 | Sistem Monitoring Suhu ESP32
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    Highcharts.setOptions({ time: { useUTC: false } });
+
+    const chart2 = Highcharts.chart('chart2', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Tekanan (SDP810)' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { title: { text: 'Tekanan' } },
+      tooltip: { xDateFormat: '%H:%M:%S', shared: true },
+      series: [
+        { name: 'Tekanan Pipa 1', data: [] },
+        { name: 'Tekanan Pipa 2', data: [] }
+      ]
+    });
+
+    const chart1 = Highcharts.chart('chart1', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Suhu Tunnel' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { title: { text: 'Suhu (°C)' } },
+      tooltip: { xDateFormat: '%H:%M:%S', shared: true },
+      series: [
+        { name: 'Suhu Ujung Pipa 1', data: [] },
+        { name: 'Suhu Ujung Pipa 2', data: [] },
+        { name: 'Suhu 1', data: [] },
+        { name: 'Suhu 2', data: [] },
+        { name: 'Suhu 3', data: [] },
+        { name: 'Suhu 4', data: [] },
+        { name: 'Suhu 5', data: [] },
+        { name: 'Suhu 6', data: [] },
+        { name: 'Suhu 7', data: [] }
+      ]
+    });
+
+    const chart3 = Highcharts.chart('chart3', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Kecepatan Udara Tunnel' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { title: { text: 'm/s' } },
+      tooltip: { xDateFormat: '%H:%M:%S', shared: true },
+      series: [
+        { name: 'Kecepatan Ujung Pipa 1', data: [] },
+        { name: 'Kecepatan Ujung Pipa 2', data: [] },
+        { name: 'Kecepatan 1', data: [] },
+        { name: 'Kecepatan 2', data: [] },
+        { name: 'Kecepatan 3', data: [] },
+        { name: 'Kecepatan 4', data: [] },
+        { name: 'Kecepatan 5', data: [] },
+        { name: 'Kecepatan 6', data: [] },
+        { name: 'Kecepatan 7', data: [] }
+      ]
+    });
+
+    async function fetchData() {
+      try {
+        const res = await fetch('/data');
+        const data = await res.json();
+        const x = Date.now();
+        const y = data.temperature;
+
+        chart2.series[0].addPoint([x, y], true, chart2.series[0].data.length > 30);
+        chart2.series[1].addPoint([x, y+1], true, chart2.series[1].data.length > 30);
+
+        // Jika data.suhu adalah array
+        chart1.series[0].addPoint([x, y], true, chart1.series[0].data.length > 30);
+        chart1.series[1].addPoint([x, y], true, chart1.series[1].data.length > 30);
+        chart1.series[2].addPoint([x, data.suhu1], true, chart1.series[2].data.length > 30);
+        chart1.series[3].addPoint([x, data.suhu2], true, chart1.series[3].data.length > 30);
+        chart1.series[4].addPoint([x, data.suhu3], true, chart1.series[4].data.length > 30);
+        chart1.series[5].addPoint([x, data.suhu4], true, chart1.series[5].data.length > 30);
+        chart1.series[6].addPoint([x, data.suhu5], true, chart1.series[6].data.length > 30);
+        chart1.series[7].addPoint([x, data.suhu6], true, chart1.series[7].data.length > 30);
+        chart1.series[8].addPoint([x, data.suhu7], true, chart1.series[8].data.length > 30);
+
+        chart3.series[0].addPoint([x, y], true, chart3.series[0].data.length > 30);
+        chart3.series[1].addPoint([x, y], true, chart3.series[1].data.length > 30);
+        chart3.series[2].addPoint([x, data.suhu1], true, chart3.series[2].data.length > 30);
+        chart3.series[3].addPoint([x, data.suhu2], true, chart3.series[3].data.length > 30);
+        chart3.series[4].addPoint([x, data.suhu3], true, chart3.series[4].data.length > 30);
+        chart3.series[5].addPoint([x, data.suhu4], true, chart3.series[5].data.length > 30);
+        chart3.series[6].addPoint([x, data.suhu5], true, chart3.series[6].data.length > 30);
+        chart3.series[7].addPoint([x, data.suhu6], true, chart3.series[7].data.length > 30);
+        chart3.series[8].addPoint([x, data.suhu7], true, chart3.series[8].data.length > 30);
+
+      } catch (error) {
+        console.error('Gagal mengambil data:', error);
+      }
+    }
+
+    setInterval(fetchData, 2000);
+
+    // Ambil data settingan realtime
+    setInterval(function () {
+      const xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          const data = this.responseText.split(',');
+          document.getElementById("Watt").innerHTML = data[0];
+          document.getElementById("Kecepatan").innerHTML = data[1];
+          document.getElementById("Arus").innerHTML = data[2];
+          document.getElementById("CalM1").innerHTML = parseFloat(data[3]).toFixed(5);
+          document.getElementById("CalB1").innerHTML = parseFloat(data[4]).toFixed(5);
+          document.getElementById("Safety").innerHTML = data[5];
+        }
+      };
+      xhttp.open("GET", "/dataSet", true);
+      xhttp.send();
+    }, 1000);
+
+    function updateServer() {
+      const xhttp = new XMLHttpRequest();
+      xhttp.open("GET", "/updateServer", true);
+      xhttp.send();
+    }
+  </script>
+</body>
+</html>

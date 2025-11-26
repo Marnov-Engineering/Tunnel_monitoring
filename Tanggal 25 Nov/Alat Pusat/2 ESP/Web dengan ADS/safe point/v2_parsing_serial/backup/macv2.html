@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Setting MAC Addresses</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #d9e2ec);
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      background-color: #2f80ed;
+      color: white;
+      padding: 24px 0;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    h2 { margin: 0; font-size: 22px; }
+    main { max-width: 1000px; margin: 20px auto; padding: 10px; }
+
+    .card {
+      background: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+    }
+
+    .section-title { font-weight: 600; margin-bottom: 8px; }
+
+    .grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      align-items: center;
+    }
+
+    label { display: block; font-size: 13px; margin-bottom: 4px; }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #d0d7de;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #555;
+    }
+
+    .actions {
+      display:flex;
+      gap:10px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    button, input[type="submit"] {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      background: #2f80ed;
+      color: white;
+    }
+
+    button.secondary {
+      background: #e6eefc;
+      color: #2f80ed;
+      border: 1px solid #c7dcff;
+    }
+
+    footer {
+      text-align: center;
+      padding: 12px;
+      color: #777;
+      font-size: 13px;
+    }
+
+    .current {
+      font-family: monospace;
+      color: #0b5cff;
+      font-size: 13px;
+      word-break: break-word;
+    }
+
+    @media (max-width: 520px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Setting MAC Addresses</h2>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="section-title">Instruksi singkat</div>
+      <div class="small">
+        Masukkan MAC address dengan format <code>AA:BB:CC:DD:EE:FF</code>. Field yang dikosongkan akan dilewati (tetap tersimpan nilai lama).
+      </div>
+    </div>
+
+    <form action="/setMac" method="get" class="card" id="macForm">
+      <div class="section-title">MAC Pusat</div>
+      <div class="grid">
+        <div>
+          <label for="mac_center">MAC Pusat</label>
+          <input type="text" id="mac_center" name="mac_center" placeholder="AA:BB:CC:DD:EE:FF"
+                 required pattern="^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$">
+          <div class="small">Tersimpan: <span id="cur_mac_center" class="current">-</span></div>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="section-title">MAC Sensor Tunnel (7)</div>
+      <div class="grid">
+        <div>
+          <label for="mac_tunnel1">Tunnel Sensor 1</label>
+          <input type="text" id="mac_tunnel1" name="mac_tunnel1" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_tunnel1" class="current">-</span></div>
+        </div>
+        <div>
+          <label for="mac_tunnel2">Tunnel Sensor 2</label>
+          <input type="text" id="mac_tunnel2" name="mac_tunnel2" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_tunnel2" class="current">-</span></div>
+        </div>
+        <div>
+          <label for="mac_tunnel3">Tunnel Sensor 3</label>
+          <input type="text" id="mac_tunnel3" name="mac_tunnel3" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_tunnel3" class="current">-</span></div>
+        </div>
+        <div>
+          <label for="mac_tunnel4">Tunnel Sensor 4</label>
+          <input type="text" id="mac_tunnel4" name="mac_tunnel4" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_tunnel4" class="current">-</span></div>
+        </div>
+        <div>
+          <label for="mac_tunnel5">Tunnel Sensor 5</label>
+          <input type="text" id="mac_tunnel5" name="mac_tunnel5" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_tunnel5" class="current">-</span></div>
+        </div>
+        <div>
+          <label for="mac_tunnel6">Tunnel Sensor 6</label>
+          <input type="text" id="mac_tunnel6" name="mac_tunnel6" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_tunnel6" class="current">-</span></div>
+        </div>
+        <div>
+          <label for="mac_tunnel7">Tunnel Sensor 7</label>
+          <input type="text" id="mac_tunnel7" name="mac_tunnel7" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_tunnel7" class="current">-</span></div>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="section-title">MAC Sensor Ujung Pipa (2)</div>
+      <div class="grid">
+        <div>
+          <label for="mac_pipe1">Ujung Pipa 1</label>
+          <input type="text" id="mac_pipe1" name="mac_pipe1" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_pipe1" class="current">-</span></div>
+        </div>
+        <div>
+          <label for="mac_pipe2">Ujung Pipa 2</label>
+          <input type="text" id="mac_pipe2" name="mac_pipe2" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_pipe2" class="current">-</span></div>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="section-title">MAC Heater (3)</div>
+      <div class="grid">
+        <div>
+          <label for="mac_heater1">Heater 1</label>
+          <input type="text" id="mac_heater1" name="mac_heater1" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_heater1" class="current">-</span></div>
+        </div>
+        <div>
+          <label for="mac_heater2">Heater 2</label>
+          <input type="text" id="mac_heater2" name="mac_heater2" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_heater2" class="current">-</span></div>
+        </div>
+        <div>
+          <label for="mac_heater3">Heater 3</label>
+          <input type="text" id="mac_heater3" name="mac_heater3" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_heater3" class="current">-</span></div>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="section-title">MAC Sensor Dinding (3)</div>
+      <div class="grid">
+        <div>
+          <label for="mac_wall1">Dinding Sensor 1</label>
+          <input type="text" id="mac_wall1" name="mac_wall1" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_wall1" class="current">-</span></div>
+        </div>
+        <div>
+          <label for="mac_wall2">Dinding Sensor 2</label>
+          <input type="text" id="mac_wall2" name="mac_wall2" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_wall2" class="current">-</span></div>
+        </div>
+        <div>
+          <label for="mac_wall3">Dinding Sensor 3</label>
+          <input type="text" id="mac_wall3" name="mac_wall3" placeholder="AA:BB:...">
+          <div class="small">Tersimpan: <span id="cur_mac_wall3" class="current">-</span></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <input type="submit" value="Simpan Semua">
+        <button type="button" class="secondary" onclick="clearForm()">Kosongkan Form</button>
+        <button type="button" onclick="window.location.href='/'">Kembali</button>
+      </div>
+    </form>
+
+    <div class="card small">
+      <div><b>Catatan teknis:</b></div>
+      <ul>
+        <li>Server ESP sebaiknya men-support endpoint <code>/setMac</code> yang menerima parameter sesuai nama field (mis. <code>?mac_center=AA:BB:...</code>) dan menyimpan ke EEPROM/Preferences.</li>
+        <li>Endpoint <code>/getMac</code> diharapkan mengembalikan daftar MAC saat ini dalam urutan sama, dipisah koma (CSV) — contoh:
+          <code>MAC_CENTER,MAC_TUN1,...,MAC_TUN7,MAC_PIPE1,MAC_PIPE2,MAC_HEAT1,MAC_HEAT2,MAC_HEAT3,MAC_WALL1,MAC_WALL2,MAC_WALL3</code>
+        </li>
+      </ul>
+    </div>
+
+  </main>
+
+  <footer>
+    &copy; 2025 | Sistem Monitoring Tunnel ESP32
+  </footer>
+
+  <script>
+    // Clear form inputs (kosongkan input saja, tidak menghapus nilai yang tersimpan di server)
+    function clearForm() {
+      const inputs = document.querySelectorAll('#macForm input[type="text"]');
+      inputs.forEach(i => i.value = '');
+    }
+
+    // Ambil data MAC dari server dan tampilkan di "Tersimpan:" serta isi input (opsional)
+    async function fetchMacs() {
+      try {
+        const res = await fetch('/getMac');
+        if (!res.ok) return;
+        const text = await res.text();
+        // Asumsikan server mengembalikan CSV dalam urutan:
+        // mac_center, mac_tunnel1..7, mac_pipe1..2, mac_heater1..3, mac_wall1..3
+        const arr = text.split(',').map(s => s.trim());
+
+        // Map ke elemen sesuai urutan
+        const keys = [
+          'mac_center',
+          'mac_tunnel1','mac_tunnel2','mac_tunnel3','mac_tunnel4','mac_tunnel5','mac_tunnel6','mac_tunnel7',
+          'mac_pipe1','mac_pipe2',
+          'mac_heater1','mac_heater2','mac_heater3',
+          'mac_wall1','mac_wall2','mac_wall3'
+        ];
+
+        for (let i=0; i<keys.length; i++) {
+          const key = keys[i];
+          const val = arr[i] || '-';
+          const cur = document.getElementById('cur_' + key);
+          const input = document.getElementById(key);
+          if (cur) cur.textContent = val;
+          // isi input hanya jika kosong (jaga agar user tidak kehilangan yang diketik)
+          if (input && input.value.trim().length === 0 && val !== '-') input.value = val;
+        }
+      } catch (err) {
+        console.warn('Gagal mengambil MAC:', err);
+      }
+    }
+
+    // Fetch initial and periodik
+    fetchMacs();
+    setInterval(fetchMacs, 3000);
+  </script>
+</body>
+</html>

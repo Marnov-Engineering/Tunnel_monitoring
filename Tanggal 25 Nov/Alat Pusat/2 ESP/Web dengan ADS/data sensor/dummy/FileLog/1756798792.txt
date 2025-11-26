@@ -1,0 +1,310 @@
+ 
+iCWp=0
+WakeUpR=5
+CT=1756798792
+vOFDLog
+lTimeStampLog
+ 
+tStamp=1756823992
+rTime=1756823992
+tm=Tue Sep  2 14:39:52 2025
+2025-09-02 14:39:52
+
++ICCID: 8962100092945813300
+
+OK
+
+/Rain/TurnedOn/id=08B61F34AB18&timestamp=1756798792&phone=8962100092945813300
+Char OFF
+,Full OFF
+TimeOutTicking
+iHC= 0,iHCIn= 0,MMPT= 2.00,tHC= 0,Vol= 0.00
+bSendGPSlocIsAchieved
+GPSIsAchieved
+vGetLocGPSReport
+LatRTC = 0.00LongRTC = 0.00Location Not Found
+bMinuteReportIsAchieved = 1
+CTime = 1756798792,LPeriodRTimeRTC = 0, CTime-LPRTimeRTC = 1756798792 >= TimeReportPeriodical * 60 = 900PeriodIsAchieved
+vCheckCREG___
+vGetCurrentTimeRTC
+CTimeRTC = 1756798809
+TimeWakeUp = 1756798809
+
+OK
+
++ICCID: 8962100092945813300
+
+OK
+
+ICCID: 8962100092945813300
+Sig: 125
+SVol=0.00
+ADay=0.00,SVol=0.00,HBRD=0.00RVol=0.00
+cRR=1-0-1-0
+iccid=8962100092945813300
+/Rain/PeriodicESP32/volt=6.58&signal=125&rainvol=0.00&rainrate=1-0-1-0&timestamp=1756798809&id=08B61F34AB18&version=118&status=0&ICCID=8962100092945813300
+String Received : {"notifA":"10","notifC":"92","recap":"07:00","voltLow":"6","Kuota":"bada33b8","Nomor":"fb35855","location":"MARNOV","saveSDCard":"5","infotime32":"15","latestVersion32":"118","mmpertick":"2","starttick":"1","stoptime":"100","station":"PCH PCB Baru 3","chip":"ESP32","currentVersion":"118","batScale":"0.65149"}
+TRPeriodi infotime32 :15, TR1Day:7, TOSet:100, saveSDCard:5, SPNotifA:10.00, BVolLimit:6.00, MMPTick:2.00, SPNotifC:92.00, BatScale:0.65, latestVersion32:118, CRC32ESP32:, lRequestFile:0
+, lRequestFileTime:0
+bTSaveData
+Start-vAddDPeriodic
+SVol=0.00
+RVol=0.00
+02/09/2025/14:40:09,0.00,6.58,OFF,OFF,NO
+End-vAddDPeriodic
+RequestFile = 0
+iTryReUploadRequestFile = 0
+RequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+LOKASI SUDAH DI DAPATKAN
+bNoMTick
+iHC= 0,iHCIn= 0,MMPT= 2.00bNoMTick=1
+CTime = 1756798809,LPeriodRTimeRTC = 1756798200, CTime-LPRTimeRTC = 609
+vDeepSleepSaveData
+CTime = 1756798809,TimeRTC = 1756798800,CTime-TimeRTC = 9iCounterDP = 1
+DP for 302
+vCFDataLog
+ 
+iCWp=1
+WakeUpR=1
+CT=1756798891
+vOFDLog
+lTimeStampLog
+ 
+tStamp=1756824091
+rTime=1756824091
+tm=Tue Sep  2 14:41:31 2025
+2025-09-02 14:41:31
+Char OFF
+,Full OFF
+bisRain=1
+bisRainingStatusRTC=1
+iHC= 1,iHCIn= 0,MMPT= 2.00,tHC= 1,Vol= 2.00
+TimeOutTicking
+FirstRaining
+/Rain/Start/id=08B61F34AB18&timestamp=1756798891
+vCheckCREG___
+SetupModule
+vCheckCREG___
+GPRSconfig OK
+HTTPS GET request...iHC= 1,iHCIn= 0,MMPT= 2.00,tHC= 1,Vol= 2.00
+cVolume = 0.20
+bANotifC
+cVolume = 0.20
+bSendGPSlocIsAchieved
+bMinuteReportIsAchieved = 0
+CTime = 1756798891,LPeriodRTimeRTC = 1756798200, CTime-LPRTimeRTC = 691 >= TimeReportPeriodical * 60 = 900RequestFile = 0
+iTryReUploadRequestFile = 0
+RequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+LOKASI SUDAH DI DAPATKAN
+bNoMTick
+iHC= 1,iHCIn= 0,MMPT= 2.00bNoMTick=0
+iHC= 1,iHCIn= 0,MMPT= 2.00,tHC= 1,Vol= 2.00
+cVolume = 0.20
+bANotifC
+cVolume = 0.20
+bNoMTick
+iHC= 1,iHCIn= 0,MMPT= 2.00bNoMTick=1
+CTime = 1756798891,LPeriodRTimeRTC = 1756798200, CTime-LPRTimeRTC = 691
+vDeepSleepSaveData
+CTime = 1756798891,TimeRTC = 1756798800,CTime-TimeRTC = 91iCounterDP = 2
+DP for 217
+vCFDataLog
+ 
+iCWp=2
+WakeUpR=1
+CT=1756798920
+vOFDLog
+lTimeStampLog
+ 
+tStamp=1756824120
+rTime=1756824120
+tm=Tue Sep  2 14:42:00 2025
+2025-09-02 14:42:00
+Char OFF
+,Full OFF
+iHC= 2,iHCIn= 0,MMPT= 2.00,tHC= 2,Vol= 4.00
+TimeOutTicking
+iHC= 2,iHCIn= 0,MMPT= 2.00,tHC= 2,Vol= 4.00
+cVolume = 0.40
+bANotifC
+cVolume = 0.40
+bSendGPSlocIsAchieved
+bMinuteReportIsAchieved = 0
+CTime = 1756798920,LPeriodRTimeRTC = 1756798200, CTime-LPRTimeRTC = 720 >= TimeReportPeriodical * 60 = 900RequestFile = 0
+iTryReUploadRequestFile = 0
+RequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+LOKASI SUDAH DI DAPATKAN
+bNoMTick
+iHC= 2,iHCIn= 0,MMPT= 2.00bNoMTick=0
+iHC= 2,iHCIn= 0,MMPT= 2.00,tHC= 2,Vol= 4.00
+cVolume = 0.40
+bANotifC
+cVolume = 0.40
+bNoMTick
+iHC= 2,iHCIn= 0,MMPT= 2.00bNoMTick=1
+CTime = 1756798920,LPeriodRTimeRTC = 1756798200, CTime-LPRTimeRTC = 720
+vDeepSleepSaveData
+CTime = 1756798920,TimeRTC = 1756798800,CTime-TimeRTC = 120iCounterDP = 3
+DP for 187
+vCFDataLog
+ 
+iCWp=3
+WakeUpR=1
+CT=1756798926
+vOFDLog
+lTimeStampLog
+ 
+tStamp=1756824126
+rTime=1756824126
+tm=Tue Sep  2 14:42:06 2025
+2025-09-02 14:42:06
+Char OFF
+,Full OFF
+iHC= 3,iHCIn= 0,MMPT= 2.00,tHC= 3,Vol= 6.00
+TimeOutTicking
+iHC= 3,iHCIn= 0,MMPT= 2.00,tHC= 3,Vol= 6.00
+cVolume = 0.60
+bANotifC
+cVolume = 0.60
+bSendGPSlocIsAchieved
+bMinuteReportIsAchieved = 0
+CTime = 1756798926,LPeriodRTimeRTC = 1756798200, CTime-LPRTimeRTC = 726 >= TimeReportPeriodical * 60 = 900RequestFile = 0
+iTryReUploadRequestFile = 0
+RequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+LOKASI SUDAH DI DAPATKAN
+bNoMTick
+iHC= 3,iHCIn= 0,MMPT= 2.00bNoMTick=0
+iHC= 3,iHCIn= 0,MMPT= 2.00,tHC= 3,Vol= 6.00
+cVolume = 0.60
+bANotifC
+cVolume = 0.60
+bNoMTick
+iHC= 3,iHCIn= 0,MMPT= 2.00bNoMTick=1
+CTime = 1756798926,LPeriodRTimeRTC = 1756798200, CTime-LPRTimeRTC = 726
+vDeepSleepSaveData
+CTime = 1756798926,TimeRTC = 1756798800,CTime-TimeRTC = 126iCounterDP = 4
+DP for 180
+vCFDataLog
+ 
+iCWp=4
+WakeUpR=1
+CT=1756798935
+vOFDLog
+lTimeStampLog
+ 
+tStamp=1756824135
+rTime=1756824135
+tm=Tue Sep  2 14:42:15 2025
+2025-09-02 14:42:15
+Char OFF
+,Full OFF
+iHC= 4,iHCIn= 0,MMPT= 2.00,tHC= 4,Vol= 8.00
+TimeOutTicking
+iHC= 4,iHCIn= 0,MMPT= 2.00,tHC= 4,Vol= 8.00
+cVolume = 0.80
+bANotifC
+cVolume = 0.80
+bSendGPSlocIsAchieved
+bMinuteReportIsAchieved = 0
+CTime = 1756798935,LPeriodRTimeRTC = 1756798200, CTime-LPRTimeRTC = 735 >= TimeReportPeriodical * 60 = 900RequestFile = 0
+iTryReUploadRequestFile = 0
+RequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+LOKASI SUDAH DI DAPATKAN
+bNoMTick
+iHC= 4,iHCIn= 0,MMPT= 2.00bNoMTick=0
+iHC= 4,iHCIn= 0,MMPT= 2.00,tHC= 4,Vol= 8.00
+cVolume = 0.80
+bANotifC
+cVolume = 0.80
+bNoMTick
+iHC= 4,iHCIn= 0,MMPT= 2.00bNoMTick=1
+CTime = 1756798935,LPeriodRTimeRTC = 1756798200, CTime-LPRTimeRTC = 735
+vDeepSleepSaveData
+CTime = 1756798935,TimeRTC = 1756798800,CTime-TimeRTC = 135iCounterDP = 5
+DP for 171
+vCFDataLog
+ 
+iCWp=5
+WakeUpR=2
+CT=1756799109
+vOFDLog
+lTimeStampLog
+ 
+tStamp=1756824309
+rTime=1756824309
+tm=Tue Sep  2 14:45:09 2025
+2025-09-02 14:45:09
+Char OFF
+,Full OFF
+TimeOutTicking
+iHC= 4,iHCIn= 0,MMPT= 2.00,tHC= 4,Vol= 8.00
+SVol=0.80
+CurahRS=0.80
+ADay=0.80
+SVol=0.80
+CurahRS=0.80
+iHC= 0,iHCIn= 0,MMPT= 2.00,tHC= 0,Vol= 0.00
+EndOfRaining
+CurahRS=0.80
+/Rain/Stop/id=08B61F34AB18&timestop=1756799009&curah=0.80&timestart=1756798891
+vCheckCREG___
+SetupModule
+vCheckCREG___
+GPRSconfig OK
+HTTPS GET request...ShowVolume = 0.00
+PeriodIsAchieved
+vCheckCREG___
+vGetCurrentTimeRTC
+CTimeRTC = 1756799139
+TimeWakeUp = 1756799139
+
+OK
+
++ICCID: 8962100092945813300
+
+OK
+
+ICCID: 8962100092945813300
+Sig: 125
+SVol=0.00
+ADay=0.80,SVol=0.00,HBRD=0.00RVol=0.80
+cRR=6-5-2-0
+iccid=8962100092945813300
+/Rain/PeriodicESP32/volt=6.58&signal=125&rainvol=0.80&rainrate=6-5-2-0&timestamp=1756799139&id=08B61F34AB18&version=118&status=0&ICCID=8962100092945813300
+String Received : {"notifA":"10","notifC":"92","recap":"07:00","voltLow":"6","Kuota":"bada33b8","Nomor":"fb35855","location":"MARNOV","saveSDCard":"5","infotime32":"15","latestVersion32":"118","mmpertick":"2","starttick":"1","stoptime":"100","station":"PCH PCB Baru 3","chip":"ESP32","currentVersion":"118","batScale":"0.65149"}
+TRPeriodi infotime32 :15, TR1Day:7, TOSet:100, saveSDCard:5, SPNotifA:10.00, BVolLimit:6.00, MMPTick:2.00, SPNotifC:92.00, BatScale:0.65, latestVersion32:118, CRC32ESP32:, lRequestFile:0
+, lRequestFileTime:0
+bSendGPSlocIsAchieved
+bMinuteReportIsAchieved = 0
+CTime = 1756799139,LPeriodRTimeRTC = 1756799100, CTime-LPRTimeRTC = 39 >= TimeReportPeriodical * 60 = 900bTSaveData
+Start-vAddDPeriodic
+SVol=0.00
+RVol=0.80
+02/09/2025/14:45:39,0.80,6.58,OFF,OFF,NO
+End-vAddDPeriodic
+RequestFile = 0
+iTryReUploadRequestFile = 0
+RequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+LOKASI SUDAH DI DAPATKAN
+bNoMTick
+iHC= 0,iHCIn= 0,MMPT= 2.00bNoMTick=0
+iHC= 0,iHCIn= 0,MMPT= 2.00,tHC= 0,Vol= 0.00
+bNoMTick
+iHC= 0,iHCIn= 0,MMPT= 2.00bNoMTick=1
+CTime = 1756799139,LPeriodRTimeRTC = 1756799100, CTime-LPRTimeRTC = 39
+vDeepSleepSaveData
+CTime = 1756799139,TimeRTC = 1756799100,CTime-TimeRTC = 39iCounterDP = 6
+DP for 271
+vCFDataLog

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Monitoring Suhu - BME280</title>
+  <script src="/highcharts.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #d9e2ec);
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      background-color: #2f80ed;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    main {
+      padding: 30px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .chart-container {
+      margin-bottom: 30px;
+    }
+
+    .chart-box {
+      width: 100%;
+      height: 400px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 10px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      color: #777;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Monitoring Tunnel</h2>
+  </header>
+
+  <main>
+    <div class="chart-container">
+      <div id="chart1" class="chart-box"></div>
+    </div>
+    <div class="chart-container">
+      <div id="chart2" class="chart-box"></div>
+    </div>
+    <div class="chart-container">
+      <div id="chart3" class="chart-box"></div>
+    </div>
+    <div class="chart-container">
+      <div id="chart4" class="chart-box"></div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 | Sistem Monitoring Suhu ESP32
+  </footer>
+
+  <script>
+    Highcharts.setOptions({ time: { useUTC: false } });
+
+    const chart1 = Highcharts.chart('chart1', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Suhu (BME280)' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { title: { text: 'Suhu (°C)' } },
+      tooltip: {
+        xDateFormat: '%H:%M:%S',
+        shared: true
+      },
+      series: [{ name: 'Suhu', data: [] }]
+    });
+
+    const chart2 = Highcharts.chart('chart2', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Pressusre (SDP810)' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { title: { text: 'Pressure' } },
+      tooltip: {
+        xDateFormat: '%H:%M:%S',
+        shared: true
+      },
+      series: [{ name: 'Suhu', data: [] }]
+    });
+
+    const chart3 = Highcharts.chart('chart3', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Velocity (Anemometer)' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { title: { text: 'Kecepatan' } },
+      tooltip: {
+        xDateFormat: '%H:%M:%S',
+        shared: true
+      },
+      series: [{ name: 'Suhu', data: [] }]
+    });
+
+    const chart4 = Highcharts.chart('chart4', {
+      chart: { type: 'spline' },
+      title: { text: 'Grafik Velocity (Anemometer)' },
+      xAxis: { type: 'datetime', title: { text: 'Waktu' } },
+      yAxis: { title: { text: 'Kecepatan' } },
+      tooltip: {
+        xDateFormat: '%H:%M:%S',
+        shared: true
+      },
+      series: [
+        { name: 'Suhu 1', data: [] },
+        { name: 'Suhu 2', data: [] },
+        { name: 'Suhu 3', data: [] },
+        { name: 'Suhu 4', data: [] },
+        { name: 'Suhu 5', data: [] },
+        { name: 'Suhu 6', data: [] },
+        { name: 'Suhu 7', data: [] }
+      ]
+    });
+
+    async function fetchData() {
+      try {
+        const res = await fetch('/data');
+        const data = await res.json();
+        const x = (new Date()).getTime();
+        const y = data.temperature;
+
+        // Tambahkan ke kedua chart
+        chart1.series[0].addPoint([x, y], true, chart1.series[0].data.length > 30);
+        chart2.series[0].addPoint([x, y], true, chart2.series[0].data.length > 30);
+        chart3.series[0].addPoint([x, y], true, chart3.series[0].data.length > 30);
+
+        chart4.series[0].addPoint([x, y+1], true, chart4.series[0].data.length > 30);
+        chart4.series[1].addPoint([x, y+2], true, chart4.series[1].data.length > 30);
+        chart4.series[2].addPoint([x, y+3], true, chart4.series[2].data.length > 30);
+        chart4.series[3].addPoint([x, y+4], true, chart4.series[3].data.length > 30);
+        chart4.series[4].addPoint([x, y+5], true, chart4.series[4].data.length > 30);
+        chart4.series[5].addPoint([x, y+6], true, chart4.series[5].data.length > 30);
+        chart4.series[6].addPoint([x, y+7], true, chart4.series[6].data.length > 30);
+      } catch (error) {
+        console.error('Gagal mengambil data:', error);
+      }
+    }
+
+    setInterval(fetchData, 2000); // Update setiap 2 detik
+  </script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Setting MAC Address</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #d9e2ec);
+      margin: 0;
+      padding: 0px;
+      color: #333;
+    }
+
+    header {
+      background-color: #2f80ed;
+      color: white;
+      padding: 30px 0;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    h2 { margin: 0; font-size: 24px; }
+    main { max-width: 600px; margin: auto; padding: 20px; }
+
+    .control-section {
+      margin: 20px 0;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    input, button {
+      padding: 8px;
+      margin: 5px;
+      font-size: 14px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      color: #777;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Setting MAC Address</h2>
+  </header>
+
+  <main>
+    <div class="control-section">
+      <p><b>Input MAC Address</b></p>
+      <form action="/setMac" method="get">
+        <input type="text" name="mac1" placeholder="MAC Address 1 (AA:BB:CC:DD:EE:FF)" required pattern="^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$">
+        <br>
+        <input type="submit" value="Simpan">
+      </form>
+      <p>MAC 1 = <span id="mac1_val">-</span></p>
+    </div>
+
+    <div class="control-section">
+      <button onclick="window.location.href='/'">Kembali ke Dashboard</button>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 | Sistem Monitoring Tunnel ESP32
+  </footer>
+
+  <script>
+    // Ambil data MAC realtime
+    setInterval(function () {
+      const xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          const data = this.responseText.split(',');
+          document.getElementById("mac1_val").innerText = data[0];
+          document.getElementById("mac2_val").innerText = data[1];
+        }
+      };
+      xhttp.open("GET", "/getMac", true);
+      xhttp.send();
+    }, 2000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,847 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Monitoring Tunnel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/data.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #d9e2ec);
+      margin: 0;
+      padding: 0px;
+      color: #333;
+    }
+
+    header {
+      background-color: #2f80ed;
+      color: white;
+      padding: 30px 0;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    h2 { margin: 0; font-size: 24px; }
+    main { max-width: 1200px; margin: auto; }
+
+    .chart-container {
+      margin-top: 30px;
+      margin-bottom: 30px;
+    }
+
+    .chart-box {
+      width: 100%;
+      height: 400px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 00px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    form, .control-section {
+      margin: 20px 0;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      justify-content: center;
+      align-items: center;
+    }
+
+    input, button, select {
+      padding: 8px;
+      margin: 5px;
+      font-size: 14px;
+    }
+
+    hr { margin-top: 20px; margin-bottom: 20px; }
+
+    .heater-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        margin: 20px auto;
+    }
+
+    .heater-card {
+        flex: 1 1 300px; /* fleksibel min 300px */
+        max-width: 380px;
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .highcharts-contextmenu {
+        max-height: 200px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        z-index: 9999 !important;
+    }
+
+
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Monitoring Tunnel</h2>
+  </header>
+
+  <main>
+    <div class="chart-container"><div id="chart-Temperature" class="chart-box"></div></div>
+    <div class="chart-container"><div id="chart-Humidity" class="chart-box"></div></div>
+    <div class="chart-container"><div id="chart-Velocity" class="chart-box"></div></div>
+    <div class="chart-container"><div id="chart-Pressure" class="chart-box"></div></div>
+
+    <!-- Form Kontrol dan Kalibrasi -->
+    <div style="text-align: center; max-width: 1200px; margin: 0 auto;">
+
+    <!-- <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1200px; margin: 0 auto;"> -->
+      <div style="
+      display: grid; 
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 20px; 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      justify-content: center; 
+      align-items: start; 
+      text-align: center;">
+
+      <!-- <div class="control-section">
+        <h3>ESP32 Web Server Calibration</h3>
+
+        <p><b>Set Power Fan:</b></p>
+        <form action="/get">
+          <input type="number" name="In_Suhu_Max" placeholder="Set Power Fan">
+          <input type="submit" value="Submit">
+        </form>
+        <p>Power = <span id="Watt">0</span> WATT</p>
+        <p>Kecepatan = <span id="Kecepatan">0</span> %</p>
+      </div> -->
+
+        <!-- Atas kiri -->
+        <div class="control-section">
+          <h3>Power Fan 1</h3>
+          <form action="/get">
+            <input type="number" name="In_Watt_Max1" placeholder="Set Power Fan 1">
+            <input type="submit" value="Submit">
+          </form>
+          <p>Power 1 = <span id="Watt1">0</span> WATT</p>
+          <p>Kecepatan 1 = <span id="Kecepatan1">0</span> %</p>
+        </div>
+
+        <!-- Atas kanan -->
+        <div class="control-section">
+          <h3>Power Fan 2</h3>
+          <form action="/get">
+            <input type="number" name="In_Watt_Max2" placeholder="Set Power Fan 2">
+            <input type="submit" value="Submit">
+          </form>
+          <p>Power 2 = <span id="Watt2">0</span> WATT</p>
+          <p>Kecepatan 2 = <span id="Kecepatan2">0</span> %</p>
+        </div>
+
+        <!-- Bawah kiri -->
+        <div class="control-section">
+          <h3>Power Fan 3</h3>
+          <form action="/get">
+            <input type="number" name="In_Watt_Max3" placeholder="Set Power Fan 3">
+            <input type="submit" value="Submit">
+          </form>
+          <p>Power 3 = <span id="Watt3">0</span> WATT</p>
+          <p>Kecepatan 3 = <span id="Kecepatan3">0</span> %</p>
+        </div>
+
+        <!-- Bawah kanan -->
+        <div class="control-section">
+          <h3>Power Fan 4</h3>
+          <form action="/get">
+            <input type="number" name="In_Watt_Max4" placeholder="Set Power Fan 4">
+            <input type="submit" value="Submit">
+          </form>
+          <p>Power 4 = <span id="Watt4">0</span> WATT</p>
+          <p>Kecepatan 4 = <span id="Kecepatan4">0</span> %</p>
+        </div>
+      </div>
+
+      <div class="heater-row">
+        <!-- Heater 1 -->
+        <div class="heater-card">
+          <h3>Heater 1</h3>
+          <p><b>Lock Power Heater:</b></p>
+          <form action="/get">
+            <select name="In_Lock_1">
+              <option value="1">Locked</option>
+              <option value="0">Unlocked</option>
+            </select>
+            <input type="submit" value="Submit">
+          </form>
+          <p>Heater Power = <span id="Lock_1">-</span></p>
+          <hr>
+          <p><b>Fan Power:</b></p>
+          <form action="/get">
+            <label for="In_Fan_Power1">Fan :</label>
+            <select name="In_Fan_Power1" id="In_Fan_Power1">
+              <option value="1">Max</option>
+              <option value="0">OFF</option>
+            </select>
+            <input type="submit" value="Submit">
+          </form>
+          <p>Fan = <span id="Fan_Power1">-</span></p>
+          <hr>
+          <p><b>Set Heater Power:</b></p>
+          <p>Status Fan: <span id="Fan_Status1">-</span></p> <!-- Tambahan -->
+          <!-- <form action="/get">
+            <input type="number" name="In_Power_Tunnel1" placeholder="Input Power Heater">
+            <input type="submit" value="Submit">
+          </form> -->
+          <p>Power = <span id="Power_Tunnel1">0</span> %</p>
+          <hr>
+          <p>Input Set Point</p>
+              <form action="/get" target="hidden-form">
+              <input type="number" name="In_sp1" step="0.00001" placeholder="Input nilai Kalibrasi ">
+              <input type="submit" value="Submit">
+              </form>
+              <iframe style="display: none;" name="hidden-form"></iframe>
+          <p>Nilai = <span id="SetPointSpan1">1.00000</span></p>         
+  
+        </div>
+        
+        <!-- Heater 2 -->
+        <div class="heater-card">
+          <h3>Heater 2</h3>
+          <p><b>Lock Power Heater:</b></p>
+          <form action="/get">
+            <select name="In_Lock_2">
+              <option value="1">Locked</option>
+              <option value="0">Unlocked</option>
+            </select>
+            <input type="submit" value="Submit">
+          </form>
+          <p>Heater Power = <span id="Lock_2">-</span></p>
+          <hr>
+          <p><b>Fan Power:</b></p>
+          <form action="/get">
+            <label for="In_Fan_Power2">Fan :</label>
+            <select name="In_Fan_Power2" id="In_Fan_Power2">
+              <option value="1">Max</option>
+              <option value="0">OFF</option>
+            </select>
+            <input type="submit" value="Submit">
+          </form>
+          <p>Fan = <span id="Fan_Power2">-</span></p>
+          <hr>
+          <p><b>Set Heater Power:</b></p>
+          <p>Status Fan: <span id="Fan_Status2">-</span></p> <!-- Tambahan -->
+          <!-- <form action="/get">
+            <input type="number" name="In_Power_Tunnel2" placeholder="Input Power Heater">
+            <input type="submit" value="Submit">
+          </form> -->
+          <p>Power = <span id="Power_Tunnel2">0</span> %</p>
+          <hr>
+          <p>Input Set Point</p>
+              <form action="/get" target="hidden-form">
+              <input type="number" name="In_sp2" step="0.00001" placeholder="Input nilai Kalibrasi ">
+              <input type="submit" value="Submit">
+              </form>
+              <iframe style="display: none;" name="hidden-form"></iframe>
+          <p>Nilai = <span id="SetPointSpan2">1.00000</span></p>
+
+        </div>
+      
+        <!-- Heater 3 -->
+        <div class="heater-card">
+          <h3>Heater 3</h3>
+          <p><b>Lock Power Heater:</b></p>
+          <form action="/get">
+            <select name="In_Lock_3">
+              <option value="1">Locked</option>
+              <option value="0">Unlocked</option>
+            </select>
+            <input type="submit" value="Submit">
+          </form>
+          <p>Heater Power = <span id="Lock_3">-</span></p>
+          <hr>
+          <p><b>Fan Power:</b></p>
+          <form action="/get">
+            <label for="In_Fan_Power3">Fan :</label>
+            <select name="In_Fan_Power3" id="In_Fan_Power3">
+              <option value="1">Max</option>
+              <option value="0">OFF</option>
+            </select>
+            <input type="submit" value="Submit">
+          </form>
+          <p>Fan = <span id="Fan_Power3">-</span></p>
+          <hr>
+          <p><b>Set Heater Power:</b></p>
+          <p>Status Fan: <span id="Fan_Status3">-</span></p> <!-- Tambahan -->
+          <!-- <form action="/get">
+            <input type="number" name="In_Power_Tunnel3" placeholder="Input Power Heater">
+            <input type="submit" value="Submit">
+          </form> -->
+          <p>Power = <span id="Power_Tunnel3">0</span> %</p>
+          <hr>
+          <p>Input Set Point</p>
+              <form action="/get" target="hidden-form">
+              <input type="number" name="In_sp3" step="0.00001" placeholder="Input nilai Kalibrasi ">
+              <input type="submit" value="Submit">
+              </form>
+              <iframe style="display: none;" name="hidden-form"></iframe>
+          <p>Nilai = <span id="SetPointSpan3">1.00000</span></p>
+
+        </div>
+      </div>
+
+
+    <div style="
+        display: grid; 
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 20px; 
+        max-width: 1200px; 
+        margin: 0 auto; 
+        justify-content: center; 
+        align-items: start; 
+        text-align: center;">
+
+      <div class="control-section">
+        <p><b>Menu Kontrol Sistem</b></p>
+        <button onclick="window.location.href='/controling'">Ke Halaman Kontrol</button>
+      </div>
+
+      <div class="control-section">
+        <p><b>Setting MAC Address</b></p>
+        <button onclick="window.location.href='/MAC'">Ke Settingan MAC Address</button>
+      </div>
+      
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 | Sistem Monitoring Tunnel ESP32 
+    <div style="padding : 15px;">
+      <a href="https://docs.google.com/spreadsheets/d/1x5GLqc1fo6h9dZtIKOzgKgldoM0rNhTt_zWLHTbAN9s/edit#gid=990049669" target="_blank" rel="nofollow">Download Data Cloud</a>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    var chartTemperature = new Highcharts.Chart({
+    chart: {
+      renderTo: 'chart-Temperature',
+      zoomType: 'xy'
+    },
+    title: { 
+      text: 'Monitoring Temperature Tunnel'
+    },
+    data: {
+      googleAPIKey: 'AIzaSyBpVYbHwcN1eTaR0E3_Tx9sW7WOv7GPhz8',
+      googleSpreadsheetKey: '1BNeF6kAvrh-pzZekFypiugNuggv7tBsglAP16qDk9OQ',
+      endColumn: 15,
+      parsed: function(data) {
+        let i = 0;
+        let j = 0;
+        let deleted = 0;
+        let STARTCOLUMN = 1;
+        let ENDCOLUMN = 15;
+        data.forEach(column => {
+          if (i == 0) {
+            data[j] = data[i];
+            j++;
+          } else if ((i >= STARTCOLUMN) && (i <= ENDCOLUMN)) {
+            data[j] = data[i];
+            j++;
+          } else {
+            delete data[i];
+            deleted++;
+          }
+          i++;
+        });
+        data.length -= deleted;
+      },
+    },
+    tooltip: {
+      animation: true,
+      borderRadius: 25,
+      shared: true,
+    },
+    plotOptions: {
+      line: { 
+        animation: false,
+        dataLabels: { enabled: false }
+      },
+    },
+    colors: [
+      '#007bff', // biru
+      '#00bcd4', // cyan
+      '#009688', // teal
+      '#4caf50', // hijau
+      '#8bc34a', // hijau muda
+      '#cddc39', // lime
+      '#ffeb3b', // kuning
+      '#ffc107', // amber
+      '#ff9800', // oranye
+      '#ff5722', // oranye tua
+      '#f44336', // merah
+      '#e91e63', // pink
+      '#9c27b0', // ungu
+      '#673ab7', // ungu tua
+      '#3f51b5'  // biru keunguan
+    ],
+    xAxis: { 
+      type: 'datetime',
+      dateTimeLabelFormats: { second: '%H:%M:%S' },
+      style: { color: '#000000' },
+      crosshair: true,
+    },
+    yAxis: { 
+      labels: {
+        format: '{value} °C',
+        style: { color: '#000000' }
+      },
+      title: {
+        text: 'Temperature (°C)',
+        style: { color: '#000000' }
+      }
+    },
+    credits: { enabled: false }
+  });
+
+    var chartHumidity = new Highcharts.Chart({
+      chart:{
+        renderTo : 'chart-Humidity',
+        zoomType : 'xy'
+      },
+      title: { text: 'Monitoring Humidity Tunnel'
+      },
+      data: {
+            // googleAPIKey: 'AIzaSyBONp2_SP4-qJIsP5hqV6Qg6WGv9Jnf9Ro',
+            // googleSpreadsheetKey: '12N7-LcxSufxSMqyTxYcm7PJx6BHC_ugz5wIz_SxclbA'
+            googleAPIKey: 'AIzaSyBpVYbHwcN1eTaR0E3_Tx9sW7WOv7GPhz8',
+            googleSpreadsheetKey: '1BNeF6kAvrh-pzZekFypiugNuggv7tBsglAP16qDk9OQ',
+            endColumn:24,
+            parsed:function(data) {
+              let i=0;
+              let j=0;
+              let deleted=0;
+              let STARTCOLUMN=16;
+              let ENDCOLUMN=24;
+              data.forEach(column => {
+                // console.log(i)
+                if (i==0) {
+                  data[j]=data[i]
+                  j++
+                  // console.log("i==0");
+                } else if ((i>=STARTCOLUMN)&&(i<=ENDCOLUMN)) {
+                  data[j]=data[i]
+                  j++
+                  // console.log("else if ((i>=STARTCOLUMN)&&(i<=ENDCOLUMN)");
+                } else {
+                  delete data[i]
+                  deleted++
+                  // console.log("else");
+                }
+                i++;
+              })
+              data.length-=deleted
+              // console.log(data.length)
+            },
+        },
+      tooltip: {
+        animation: true,
+        borderRadius: 25,
+        shared: true,
+      },
+      plotOptions: {
+        line: { animation: false,
+          dataLabels: { enabled: false }
+        },
+        // series: { color: '#059e8a' }
+      },
+      colors: [
+        '#007bff', // biru
+        '#00bcd4', // cyan
+        '#009688', // teal
+        '#4caf50', // hijau
+        '#8bc34a', // hijau muda
+        '#cddc39', // lime
+        '#ffeb3b', // kuning
+        '#ffc107', // amber
+        '#ff9800', // oranye
+        '#ff5722', // oranye tua
+        '#f44336', // merah
+        '#e91e63', // pink
+        '#9c27b0', // ungu
+        '#673ab7', // ungu tua
+        '#3f51b5'  // biru keunguan
+      ],
+      xAxis: { type: 'datetime',
+        dateTimeLabelFormats: { second: '%H:%M:%S' },
+        style: {
+                  color: '#000000',
+                },
+        crosshair: true,
+      },
+      yAxis: { // Primary yAxis
+            labels: {
+                format: '{value} (%)',
+                style: {
+                    color: '#000000',
+                }
+            },
+            title: {
+                text: 'CH4 Concentration (%)',
+                style: {
+                    color: '#000000',
+                }
+            }
+        },
+      credits: { enabled: false }
+    });
+    
+    var chartVelocity = new Highcharts.Chart({
+      chart:{
+        renderTo : 'chart-Velocity',
+        zoomType : 'xy'
+      },
+      title: { text: 'Monitoring Velocity Tunnel'
+      },
+      data: {
+            // googleAPIKey: 'AIzaSyBONp2_SP4-qJIsP5hqV6Qg6WGv9Jnf9Ro',
+            // googleSpreadsheetKey: '12N7-LcxSufxSMqyTxYcm7PJx6BHC_ugz5wIz_SxclbA'
+            googleAPIKey: 'AIzaSyBpVYbHwcN1eTaR0E3_Tx9sW7WOv7GPhz8',
+            googleSpreadsheetKey: '1BNeF6kAvrh-pzZekFypiugNuggv7tBsglAP16qDk9OQ',
+            endColumn:33,
+            parsed:function(data) {
+              let i=0;
+              let j=0;
+              let deleted=0;
+              let STARTCOLUMN=25;
+              let ENDCOLUMN=33;
+              data.forEach(column => {
+                // console.log(i)
+                if (i==0) {
+                  data[j]=data[i]
+                  j++
+                  // console.log("i==0");
+                } else if ((i>=STARTCOLUMN)&&(i<=ENDCOLUMN)) {
+                  data[j]=data[i]
+                  j++
+                  // console.log("else if ((i>=STARTCOLUMN)&&(i<=ENDCOLUMN)");
+                } else {
+                  delete data[i]
+                  deleted++
+                  // console.log("else");
+                }
+                i++;
+              })
+              data.length-=deleted
+              // console.log(data.length)
+            },
+        },
+      tooltip: {
+        animation: true,
+        borderRadius: 25,
+        shared: true,
+      },
+      plotOptions: {
+        line: { animation: false,
+          dataLabels: { enabled: false }
+        },
+        // series: { color: '#059e8a' }
+      },
+      colors: [
+        '#007bff', // biru
+        '#00bcd4', // cyan
+        '#009688', // teal
+        '#4caf50', // hijau
+        '#8bc34a', // hijau muda
+        '#cddc39', // lime
+        '#ffeb3b', // kuning
+        '#ffc107', // amber
+        '#ff9800', // oranye
+        '#ff5722', // oranye tua
+        '#f44336', // merah
+        '#e91e63', // pink
+        '#9c27b0', // ungu
+        '#673ab7', // ungu tua
+        '#3f51b5'  // biru keunguan
+      ],
+      xAxis: { type: 'datetime',
+        dateTimeLabelFormats: { second: '%H:%M:%S' },
+        style: {
+                  color: '#000000',
+                },
+        crosshair: true,
+      },
+      yAxis: { // Primary yAxis
+            labels: {
+                format: '{value} (m/s)',
+                style: {
+                    color: '#000000',
+                }
+            },
+            title: {
+                text: 'Velocity (m/s)',
+                style: {
+                    color: '#000000',
+                }
+            }
+        },
+      credits: { enabled: false }
+    });
+
+    var chartPressure = new Highcharts.Chart({
+      chart:{
+        renderTo : 'chart-Pressure',
+        zoomType : 'xy'
+      },
+      title: { text: 'Monitoring Pressure Tunnel'
+      },
+      data: {
+            // googleAPIKey: 'AIzaSyBONp2_SP4-qJIsP5hqV6Qg6WGv9Jnf9Ro',
+            // googleSpreadsheetKey: '12N7-LcxSufxSMqyTxYcm7PJx6BHC_ugz5wIz_SxclbA'
+            googleAPIKey: 'AIzaSyBpVYbHwcN1eTaR0E3_Tx9sW7WOv7GPhz8',
+            googleSpreadsheetKey: '1BNeF6kAvrh-pzZekFypiugNuggv7tBsglAP16qDk9OQ',
+            endColumn:38,
+            parsed:function(data) {
+              let i=0;
+              let j=0;
+              let deleted=0;
+              let STARTCOLUMN=34;
+              let ENDCOLUMN=35;
+              data.forEach(column => {
+                // console.log(i)
+                if (i==0) {
+                  data[j]=data[i]
+                  j++
+                  // console.log("i==0");
+                } else if ((i>=STARTCOLUMN)&&(i<=ENDCOLUMN)) {
+                  data[j]=data[i]
+                  j++
+                  // console.log("else if ((i>=STARTCOLUMN)&&(i<=ENDCOLUMN)");
+                } else {
+                  delete data[i]
+                  deleted++
+                  // console.log("else");
+                }
+                i++;
+              })
+              data.length-=deleted
+              // console.log(data.length)
+            },
+        },
+      tooltip: {
+        animation: true,
+        borderRadius: 25,
+        shared: true,
+      },
+      plotOptions: {
+        line: { animation: false,
+          dataLabels: { enabled: false }
+        },
+        // series: { color: '#059e8a' }
+      },
+      colors: [
+        '#007bff', // biru
+        '#00bcd4', // cyan
+        '#009688', // teal
+        '#4caf50', // hijau
+        '#8bc34a', // hijau muda
+        '#cddc39', // lime
+        '#ffeb3b', // kuning
+        '#ffc107', // amber
+        '#ff9800', // oranye
+        '#ff5722', // oranye tua
+        '#f44336', // merah
+        '#e91e63', // pink
+        '#9c27b0', // ungu
+        '#673ab7', // ungu tua
+        '#3f51b5'  // biru keunguan
+      ],
+      xAxis: { type: 'datetime',
+        dateTimeLabelFormats: { second: '%H:%M:%S' },
+        style: {
+                  color: '#000000',
+                },
+        crosshair: true,
+      },
+      yAxis: { // Primary yAxis
+            labels: {
+                format: '{value} (Pa)',
+                style: {
+                    color: '#000000',
+                }
+            },
+            title: {
+                text: 'Pascal (Pa)',
+                style: {
+                    color: '#000000',
+                }
+            }
+        },
+      credits: { enabled: false }
+    });
+
+
+
+
+
+    async function fetchData() {
+      try {
+        const res = await fetch('/data');
+        const data = await res.json();
+        // const x = Date.now();
+        const y = data.temperature;
+        const x = data.time;
+        console.log('Nilia waktu:', x);
+        chartPressure.series[0].addPoint([x, data.USDP1]);
+        chartPressure.series[1].addPoint([x, data.USDP2]);
+
+        // Jika data.suhu adalah array
+        chartTemperature.series[0].addPoint([x, data.Usuhu1]);
+        chartTemperature.series[1].addPoint([x, data.Usuhu2]);
+        chartTemperature.series[2].addPoint([x, data.suhu1]);
+        chartTemperature.series[3].addPoint([x, data.suhu2]);
+        chartTemperature.series[4].addPoint([x, data.suhu3]);
+        chartTemperature.series[5].addPoint([x, data.suhu4]);
+        chartTemperature.series[6].addPoint([x, data.suhu5]);
+        chartTemperature.series[7].addPoint([x, data.suhu6]);
+        chartTemperature.series[8].addPoint([x, data.suhu7]);
+
+        chartTemperature.series[9].addPoint([x, data.Dsuhu1]);
+        chartTemperature.series[10].addPoint([x, data.Dsuhu2]);
+        chartTemperature.series[11].addPoint([x, data.Dsuhu3]);
+
+        chartTemperature.series[12].addPoint([x, data.Psuhu1]);
+        chartTemperature.series[13].addPoint([x, data.Psuhu2]);
+        chartTemperature.series[14].addPoint([x, data.Psuhu3]);
+
+        chartVelocity.series[0].addPoint([x, data.Ukec1]);
+        chartVelocity.series[1].addPoint([x, data.Ukec2]);
+        chartVelocity.series[2].addPoint([x, data.kec1]);
+        chartVelocity.series[3].addPoint([x, data.kec2]);
+        chartVelocity.series[4].addPoint([x, data.kec3]);
+        chartVelocity.series[5].addPoint([x, data.kec4]);
+        chartVelocity.series[6].addPoint([x, data.kec5]);
+        chartVelocity.series[7].addPoint([x, data.kec6]);
+        chartVelocity.series[8].addPoint([x, data.kec7]);
+
+        chartHumidity.series[0].addPoint([x, data.UHumid1]);
+        chartHumidity.series[1].addPoint([x, data.UHumid2]);
+        chartHumidity.series[2].addPoint([x, data.Humid1]);
+        chartHumidity.series[3].addPoint([x, data.Humid2]);
+        chartHumidity.series[4].addPoint([x, data.Humid3]);
+        chartHumidity.series[5].addPoint([x, data.Humid4]);
+        chartHumidity.series[6].addPoint([x, data.Humid5]);
+        chartHumidity.series[7].addPoint([x, data.Humid6]);
+        chartHumidity.series[8].addPoint([x, data.Humid7]);
+
+      } catch (error) {
+        console.error('Gagal mengambil data:', error);
+      }
+    }
+
+    setInterval(fetchData, 5000);
+
+    // Ambil data settingan realtime
+    setInterval(function () {
+      const xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          const data = this.responseText.split(',');
+
+          // Watt
+          document.getElementById("Watt1").innerHTML = parseFloat(data[0]).toFixed(5);
+          document.getElementById("Watt2").innerHTML = parseFloat(data[1]).toFixed(5);
+          document.getElementById("Watt3").innerHTML = parseFloat(data[2]).toFixed(5);
+          document.getElementById("Watt4").innerHTML = parseFloat(data[3]).toFixed(5);
+
+          // Kecepatan
+          document.getElementById("Kecepatan1").innerHTML = data[4];
+          document.getElementById("Kecepatan2").innerHTML = data[5];
+          document.getElementById("Kecepatan3").innerHTML = data[6];
+          document.getElementById("Kecepatan4").innerHTML = data[7];
+
+          // Power Tunnel
+          document.getElementById("Power_Tunnel1").innerHTML = data[8];
+          document.getElementById("Power_Tunnel2").innerHTML = data[9];
+          document.getElementById("Power_Tunnel3").innerHTML = data[10];
+
+          // Heater State
+          document.getElementById("Lock_1").innerHTML = (data[11] === "1") ? "Locked" : "Unlocked";
+          document.getElementById("Lock_2").innerHTML = (data[12] === "1") ? "Locked" : "Unlocked";
+          document.getElementById("Lock_3").innerHTML = (data[13] === "1") ? "Locked" : "Unlocked";
+
+          // Fan Power
+          document.getElementById("Fan_Power1").innerHTML = (data[14] === "1") ? "MAX" : "OFF";
+          document.getElementById("Fan_Power2").innerHTML = (data[15] === "1") ? "MAX" : "OFF";
+          document.getElementById("Fan_Power3").innerHTML = (data[16] === "1") ? "MAX" : "OFF";
+
+          // SetPoint
+          document.getElementById("SetPointSpan1").innerHTML = data[17];
+          document.getElementById("SetPointSpan2").innerHTML = data[18];
+          document.getElementById("SetPointSpan3").innerHTML = data[19];
+
+          // WCS State
+          WCS_state1 = parseInt(data[20]);
+          WCS_state2 = parseInt(data[21]);
+          WCS_state3 = parseInt(data[22]);
+
+
+
+          const fan1 = document.getElementById("Fan_Status1");
+          if (fan1) fan1.innerHTML = (WCS_state1 === 1) ? "Mati" : "Hidup";
+
+          const fan2 = document.getElementById("Fan_Status2");
+          if (fan2) fan2.innerHTML = (WCS_state2 === 1) ? "Mati" : "Hidup";
+
+          const fan3 = document.getElementById("Fan_Status3");
+          if (fan3) fan3.innerHTML = (WCS_state3 === 1) ? "Mati" : "Hidup";
+
+          const targetSuhu = parseFloat(data[17]);
+
+          if (!isNaN(targetSuhu)) {
+            chartTemperature.yAxis[0].removePlotLine('target-line'); // hapus garis lama
+            chartTemperature.yAxis[0].addPlotLine({
+              id: 'target-line',
+              value: targetSuhu,
+              color: 'red',
+              dashStyle: 'Dash',
+              width: 2,
+              label: {
+                text: 'Target ' + targetSuhu + '°C',
+                align: 'right',
+                x: -10,
+                style: { color: 'red', fontWeight: 'bold' }
+              }
+            });
+          }
+
+        }
+      };
+      xhttp.open("GET", "/dataSet", true);
+      xhttp.send();
+    }, 1000);
+
+    function updateServer() {
+      const xhttp = new XMLHttpRequest();
+      xhttp.open("GET", "/updateServer", true);
+      xhttp.send();
+    }
+  </script>
+</body>
+</html>

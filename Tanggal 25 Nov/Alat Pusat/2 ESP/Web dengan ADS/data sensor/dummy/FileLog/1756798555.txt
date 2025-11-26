@@ -1,0 +1,67 @@
+ 
+iCWp=0
+WakeUpR=5
+CT=1756798555
+vOFDLog
+lTimeStampLog
+ 
+tStamp=1756823755
+rTime=1756823755
+tm=Tue Sep  2 14:35:55 2025
+2025-09-02 14:35:55
+
++ICCID: 8962100092945813300
+
+OK
+
+/Rain/TurnedOn/id=08B61F34AB18&timestamp=1756798555&phone=8962100092945813300
+Char OFF
+,Full OFF
+TimeOutTicking
+iHC= 0,iHCIn= 0,MMPT= 8.50,tHC= 0,Vol= 0.00
+bSendGPSlocIsAchieved
+GPSIsAchieved
+vGetLocGPSReport
+LatRTC = 0.00LongRTC = 0.00Location Not Found
+bMinuteReportIsAchieved = 1
+CTime = 1756798555,LPeriodRTimeRTC = 0, CTime-LPRTimeRTC = 1756798555 >= TimeReportPeriodical * 60 = 300PeriodIsAchieved
+vCheckCREG___
+vGetCurrentTimeRTC
+CTimeRTC = 1756798576
+TimeWakeUp = 1756798576
+
+OK
+
++ICCID: 8962100092945813300
+
+OK
+
+ICCID: 8962100092945813300
+Sig: 123
+SVol=0.00
+ADay=0.00,SVol=0.00,HBRD=0.00RVol=0.00
+cRR=1-0-1-0
+iccid=8962100092945813300
+/Rain/PeriodicESP32/volt=12.12&signal=123&rainvol=0.00&rainrate=1-0-1-0&timestamp=1756798576&id=08B61F34AB18&version=118&status=0&ICCID=8962100092945813300
+String Received : {"notifA":"10","notifC":"92","recap":"07:00","voltLow":"6","Kuota":"bada33b8","Nomor":"fb35855","location":"MARNOV","saveSDCard":"5","batScale":"1.2","infotime32":"15","latestVersion32":"118","mmpertick":"2","starttick":"1","stoptime":"100","station":"PCH PCB Baru 3","chip":"ESP32","currentVersion":"118"}
+TRPeriodi infotime32 :15, TR1Day:7, TOSet:100, saveSDCard:5, SPNotifA:10.00, BVolLimit:6.00, MMPTick:2.00, SPNotifC:92.00, BatScale:1.20, latestVersion32:118, CRC32ESP32:, lRequestFile:0
+, lRequestFileTime:0
+bTSaveData
+Start-vAddDPeriodic
+SVol=0.00
+RVol=0.00
+02/09/2025/14:36:16,0.00,12.12,OFF,OFF,NO
+End-vAddDPeriodic
+RequestFile = 0
+iTryReUploadRequestFile = 0
+RequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+iTryReUploadRequestFileTime = 0
+LOKASI SUDAH DI DAPATKAN
+bNoMTick
+iHC= 0,iHCIn= 0,MMPT= 2.00bNoMTick=1
+CTime = 1756798576,LPeriodRTimeRTC = 1756798200, CTime-LPRTimeRTC = 376
+vDeepSleepSaveData
+CTime = 1756798576,TimeRTC = 1756798500,CTime-TimeRTC = 76iCounterDP = 1
+DP for 232
+vCFDataLog
